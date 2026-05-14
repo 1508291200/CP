@@ -1,0 +1,134 @@
+/**
+ * CSS 全局样式和 CSS 变量（设计 Token）
+ * 主题切换通过修改 :root 的 CSS 变量实现，无需重新渲染组件树
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── 默认主题变量（浅色）────────────────────────────────── */
+:root {
+  /* 主色 */
+  --color-primary:        #7B5EA7;
+  --color-primary-light:  #9B7FCA;
+  --color-primary-bg:     #F3EFFA;
+
+  /* 背景 */
+  --color-bg-page:        #F7F6FA;
+  --color-bg-card:        #FFFFFF;
+  --color-bg-sidebar:     #F9F8FC;
+
+  /* 文字 */
+  --color-text-title:     #1A1A2E;
+  --color-text-body:      #3D3D5C;
+  --color-text-secondary: #8A8AA0;
+  --color-text-disabled:  #C4C4D4;
+
+  /* 边框 */
+  --color-border:         #EBEBF0;
+  --color-border-input:   #D8D8E8;
+
+  /* 重要性等级 */
+  --color-critical:       #7B5EA7;
+  --color-high:           #F5A623;
+  --color-medium:         #5B9BD5;
+  --color-normal:         #9B9BB0;
+  --color-low:            #7DC18A;
+
+  /* 功能色 */
+  --color-success:        #7DC18A;
+  --color-warning:        #F5A623;
+  --color-danger:         #E05A5A;
+
+  /* 圆角 */
+  --radius-card:          12px;
+  --radius-btn:           20px;
+  --radius-tag:           6px;
+  --radius-input:         8px;
+  --radius-modal:         16px;
+
+  /* 字体 */
+  --font-title:           system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-body:            system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-size-base:       14px;
+  --line-height-body:     1.7;
+
+  /* 动画 */
+  --duration-fast:        150ms;
+  --duration-normal:      200ms;
+  --duration-slow:        300ms;
+  --easing-default:       ease;
+  --easing-out:           ease-out;
+
+  /* 阴影 */
+  --shadow-card:          0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-hover:         0 6px 20px rgba(0, 0, 0, 0.10);
+  --shadow-modal:         0 12px 40px rgba(0, 0, 0, 0.14);
+}
+
+/* ── 深色主题 ─────────────────────────────────────────── */
+.dark {
+  --color-primary:        #9B7FCA;
+  --color-primary-light:  #B89EE0;
+  --color-primary-bg:     #2A2240;
+
+  --color-bg-page:        #1A1826;
+  --color-bg-card:        #242133;
+  --color-bg-sidebar:     #1E1C2E;
+
+  --color-text-title:     #EEEEF5;
+  --color-text-body:      #B8B8D0;
+  --color-text-secondary: #6A6A80;
+  --color-text-disabled:  #3A3A50;
+
+  --color-border:         #333248;
+  --color-border-input:   #3D3C55;
+
+  --shadow-card:          0 2px 12px rgba(0, 0, 0, 0.24);
+  --shadow-hover:         0 6px 20px rgba(0, 0, 0, 0.32);
+  --shadow-modal:         0 12px 40px rgba(0, 0, 0, 0.40);
+}
+
+/* ── 基础重置 ─────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-body);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--color-bg-page);
+  color: var(--color-text-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+/* ── 滚动条美化 ───────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-disabled);
+}
