@@ -1,65 +1,90 @@
 /**
  * 应用入口
- * 负责：初始化配置、注册中间件、挂载路由、启动服务器
+ *
+ * 鉴权策略：
+ * - /health, /auth  → 公开
+ * - /tags GET       → 公开（读）；写操作由 tag 路由内部控制
+ * - /cps/**         → 整体 authMiddleware，写操作各路由内通过 permissionMiddleware 控制
  */
 
 import 'dotenv/config'
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { ZodError } from 'zod'
 import { getConfig } from './config/index.js'
-import { errorMiddleware } from './middlewares/error.middleware.js'
 import { loggerMiddleware } from './middlewares/logger.middleware.js'
+import { authMiddleware } from './middlewares/auth.middleware.js'
+import { AppError } from './shared/errors.js'
 import { healthRoutes } from './modules/health/health.routes.js'
+import { authRoutes } from './modules/auth/auth.routes.js'
+import { buildTagRouter } from './modules/tag/tag.routes.js'
+import { buildCpRouter } from './modules/cp/cp.routes.js'
+import { buildEventRouter } from './modules/event/event.routes.js'
+import { buildCharacterRouter } from './modules/character/character.routes.js'
+import { buildMilestoneRouter } from './modules/milestone/milestone.routes.js'
 
-// 初始化配置（启动时验证所有必填环境变量）
 const config = getConfig()
-
 const app = new Hono()
 
-// ── 全局中间件（顺序重要）────────────────────────────────
-// 1. 错误处理（最外层，捕获所有后续中间件的错误）
-app.use('*', errorMiddleware)
-
-// 2. 请求日志
+// ── 全局中间件 ─────────────────────────────────────────
 app.use('*', loggerMiddleware)
+app.use('/api/*', cors({
+  origin:       config.NODE_ENV === 'development' ? '*' : [],
+  allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+  credentials:  true,
+}))
 
-// 3. CORS（开发环境允许所有来源，生产环境通过 Nginx 控制）
-app.use(
-  '/api/*',
-  cors({
-    origin: config.NODE_ENV === 'development' ? '*' : [],
-    allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  }),
-)
-
-// ── 路由挂载 ────────────────────────────────────────────
+// ── 路由注册 ───────────────────────────────────────────
 const api = new Hono()
 
-// 健康检查（无鉴权）
+// 公开
 api.route('/health', healthRoutes)
+api.route('/auth',   authRoutes)
 
-// 将所有 API 路由挂载到 /api/v1 前缀
+// Tags（读公开，写需鉴权 - 在路由内处理）
+api.route('/tags', buildTagRouter())
+
+// CP 及子资源（整体需要登录）
+api.use('/cps/*', authMiddleware)
+api.route('/cps',                  buildCpRouter())
+api.route('/cps/:cpId/events',     buildEventRouter())
+api.route('/cps/:cpId/characters', buildCharacterRouter())
+api.route('/cps/:cpId/milestones', buildMilestoneRouter())
+
 app.route('/api/v1', api)
 
-// 404 处理
-app.notFound((c) => {
-  return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Route not found' } }, 404)
+// ── 404 ────────────────────────────────────────────────
+app.notFound((c) =>
+  c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Route not found' } }, 404),
+)
+
+// ── 全局错误处理（Hono 推荐方式）──────────────────────
+app.onError((err, c) => {
+  if (err instanceof ZodError) {
+    return c.json(
+      { success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid parameters', details: err.flatten() } },
+      400,
+    )
+  }
+  if (err instanceof AppError) {
+    return c.json(
+      { success: false, error: { code: err.code, message: err.message } },
+      err.statusCode as 400 | 401 | 403 | 404 | 409 | 500,
+    )
+  }
+  console.error('[UnhandledError]', err)
+  return c.json(
+    { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } },
+    500,
+  )
 })
 
-// ── 启动服务器 ───────────────────────────────────────────
-serve(
-  {
-    fetch: app.fetch,
-    port: config.PORT,
-  },
-  (info) => {
-    console.log(`\x1b[36m[Server]\x1b[0m Started on http://localhost:${info.port}`)
-    console.log(`\x1b[36m[Server]\x1b[0m Environment: ${config.NODE_ENV}`)
-    console.log(`\x1b[36m[Server]\x1b[0m Version: ${config.VERSION}`)
-  },
-)
+// ── 启动 ───────────────────────────────────────────────
+serve({ fetch: app.fetch, port: config.PORT }, (info) => {
+  console.log(`\x1b[36m[Server]\x1b[0m http://localhost:${info.port} (${config.NODE_ENV})`)
+  console.log(`\x1b[36m[Server]\x1b[0m Version: ${config.VERSION}`)
+})
 
 export default app
