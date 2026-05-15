@@ -9,15 +9,17 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios'
 
 // API 响应的统一格式（与后端 shared/response.ts 对应）
+export interface PaginationMeta {
+  total:   number
+  page:    number
+  limit:   number
+  hasMore: boolean
+}
+
 export interface ApiSuccess<T> {
   success: true
   data: T
-  meta?: {
-    total: number
-    page: number
-    limit: number
-    hasMore: boolean
-  }
+  meta?: PaginationMeta
 }
 
 export interface ApiError {
