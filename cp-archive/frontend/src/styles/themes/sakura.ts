@@ -1,0 +1,30 @@
+import type { ThemeConfig } from './types'
+
+export const sakuraTheme: ThemeConfig = {
+  id: 'sakura',
+  name: '樱花粉',
+  description: '柔和浪漫的樱花色调',
+  isDark: false,
+  tokens: {
+    '--color-primary':        '#E8789C',
+    '--color-primary-light':  '#F4A7C0',
+    '--color-primary-bg':     '#FEF0F5',
+    '--color-bg-page':        '#FDF7FA',
+    '--color-bg-card':        '#FFFFFF',
+    '--color-bg-sidebar':     '#FEF3F7',
+    '--color-text-title':     '#2D1A22',
+    '--color-text-body':      '#5C3A4A',
+    '--color-text-secondary': '#A07888',
+    '--color-text-disabled':  '#D4BCC6',
+    '--color-border':         '#F0DEDE',
+    '--color-border-input':   '#E8CECE',
+    '--color-critical':       '#E8789C',
+    '--color-high':           '#F5A623',
+    '--color-medium':         '#88B4DC',
+    '--color-normal':         '#A07888',
+    '--color-low':            '#9DC9A0',
+    '--color-success':        '#9DC9A0',
+    '--color-warning':        '#F5A623',
+    '--color-danger':         '#E05A5A',
+  },
+}

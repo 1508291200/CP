@@ -8,9 +8,12 @@ interface AppConfig {
   PORT: number
   DATABASE_URL: string
   REDIS_URL: string
+  REDIS_HOST: string
+  REDIS_PORT: number
   JWT_SECRET: string
   JWT_REFRESH_SECRET: string
   UPLOAD_DIR: string
+  PUBLIC_URL: string
   VERSION: string
 }
 
@@ -37,6 +40,8 @@ export function loadConfig(): AppConfig {
     PORT: parseInt(optionalEnv('PORT', '3000'), 10),
     DATABASE_URL: requireEnv('DATABASE_URL'),
     REDIS_URL: optionalEnv('REDIS_URL', 'redis://localhost:6379'),
+    REDIS_HOST: optionalEnv('REDIS_HOST', 'localhost'),
+    REDIS_PORT: parseInt(optionalEnv('REDIS_PORT', '6379'), 10),
     JWT_SECRET: nodeEnv === 'development'
       ? optionalEnv('JWT_SECRET', 'dev-secret-change-in-production')
       : requireEnv('JWT_SECRET'),
@@ -44,6 +49,7 @@ export function loadConfig(): AppConfig {
       ? optionalEnv('JWT_REFRESH_SECRET', 'dev-refresh-secret-change-in-production')
       : requireEnv('JWT_REFRESH_SECRET'),
     UPLOAD_DIR: optionalEnv('UPLOAD_DIR', './uploads'),
+    PUBLIC_URL: optionalEnv('PUBLIC_URL', 'http://localhost:3000'),
     VERSION: optionalEnv('npm_package_version', '0.1.0'),
   }
 }

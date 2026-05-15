@@ -1,0 +1,30 @@
+import type { ThemeConfig } from './types'
+
+export const vintageTheme: ThemeConfig = {
+  id: 'vintage',
+  name: '复古纸',
+  description: '温暖怀旧的牛皮纸色调',
+  isDark: false,
+  tokens: {
+    '--color-primary':        '#8B5E3C',
+    '--color-primary-light':  '#B07E58',
+    '--color-primary-bg':     '#F6EFE4',
+    '--color-bg-page':        '#F9F4EE',
+    '--color-bg-card':        '#FFFDF8',
+    '--color-bg-sidebar':     '#F5EFE6',
+    '--color-text-title':     '#2E1C0E',
+    '--color-text-body':      '#5A3A20',
+    '--color-text-secondary': '#A07850',
+    '--color-text-disabled':  '#D4C0A8',
+    '--color-border':         '#E8D8C4',
+    '--color-border-input':   '#DCC8B0',
+    '--color-critical':       '#8B5E3C',
+    '--color-high':           '#C8822A',
+    '--color-medium':         '#7090C0',
+    '--color-normal':         '#A07850',
+    '--color-low':            '#80A870',
+    '--color-success':        '#80A870',
+    '--color-warning':        '#C8822A',
+    '--color-danger':         '#C04040',
+  },
+}

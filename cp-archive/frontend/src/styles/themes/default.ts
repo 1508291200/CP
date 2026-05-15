@@ -1,0 +1,30 @@
+import type { ThemeConfig } from './types'
+
+export const defaultTheme: ThemeConfig = {
+  id: 'default',
+  name: '清新白',
+  description: '默认清新明亮主题',
+  isDark: false,
+  tokens: {
+    '--color-primary':        '#7B5EA7',
+    '--color-primary-light':  '#9B7FCA',
+    '--color-primary-bg':     '#F3EFFA',
+    '--color-bg-page':        '#F7F6FA',
+    '--color-bg-card':        '#FFFFFF',
+    '--color-bg-sidebar':     '#F9F8FC',
+    '--color-text-title':     '#1A1A2E',
+    '--color-text-body':      '#3D3D5C',
+    '--color-text-secondary': '#8A8AA0',
+    '--color-text-disabled':  '#C4C4D4',
+    '--color-border':         '#EBEBF0',
+    '--color-border-input':   '#D8D8E8',
+    '--color-critical':       '#7B5EA7',
+    '--color-high':           '#F5A623',
+    '--color-medium':         '#5B9BD5',
+    '--color-normal':         '#9B9BB0',
+    '--color-low':            '#7DC18A',
+    '--color-success':        '#7DC18A',
+    '--color-warning':        '#F5A623',
+    '--color-danger':         '#E05A5A',
+  },
+}

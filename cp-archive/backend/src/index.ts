@@ -23,6 +23,9 @@ import { buildCpRouter } from './modules/cp/cp.routes.js'
 import { buildEventRouter } from './modules/event/event.routes.js'
 import { buildCharacterRouter } from './modules/character/character.routes.js'
 import { buildMilestoneRouter } from './modules/milestone/milestone.routes.js'
+import { buildMediaRouter } from './modules/media/media.routes.js'
+import { buildSettingsRouter } from './modules/settings/settings.routes.js'
+import { startImageWorker } from './jobs/queue.js'
 
 const config = getConfig()
 const app = new Hono()
@@ -52,6 +55,14 @@ api.route('/cps',                  buildCpRouter())
 api.route('/cps/:cpId/events',     buildEventRouter())
 api.route('/cps/:cpId/characters', buildCharacterRouter())
 api.route('/cps/:cpId/milestones', buildMilestoneRouter())
+
+// 媒体上传（需登录）
+api.use('/media/*', authMiddleware)
+api.route('/media', buildMediaRouter())
+
+// 站点设置（GET 需登录，PATCH 需 admin+）
+api.use('/settings/*', authMiddleware)
+api.route('/settings', buildSettingsRouter())
 
 app.route('/api/v1', api)
 
@@ -85,6 +96,8 @@ app.onError((err, c) => {
 serve({ fetch: app.fetch, port: config.PORT }, (info) => {
   console.log(`\x1b[36m[Server]\x1b[0m http://localhost:${info.port} (${config.NODE_ENV})`)
   console.log(`\x1b[36m[Server]\x1b[0m Version: ${config.VERSION}`)
+  // 启动图片处理 Worker
+  startImageWorker()
 })
 
 export default app

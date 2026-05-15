@@ -1,0 +1,30 @@
+import type { ThemeConfig } from './types'
+
+export const inkgreenTheme: ThemeConfig = {
+  id: 'inkgreen',
+  name: '墨绿雅',
+  description: '沉稳雅致的墨绿风格',
+  isDark: false,
+  tokens: {
+    '--color-primary':        '#3D7A5E',
+    '--color-primary-light':  '#5E9E80',
+    '--color-primary-bg':     '#EAF4EF',
+    '--color-bg-page':        '#F4F7F4',
+    '--color-bg-card':        '#FFFFFF',
+    '--color-bg-sidebar':     '#EFF4F1',
+    '--color-text-title':     '#1A2E22',
+    '--color-text-body':      '#3A5040',
+    '--color-text-secondary': '#7A9A85',
+    '--color-text-disabled':  '#BEDAC9',
+    '--color-border':         '#D9E8DF',
+    '--color-border-input':   '#C8DACE',
+    '--color-critical':       '#3D7A5E',
+    '--color-high':           '#C9832A',
+    '--color-medium':         '#5B8FD5',
+    '--color-normal':         '#7A9A85',
+    '--color-low':            '#8DC99A',
+    '--color-success':        '#8DC99A',
+    '--color-warning':        '#C9832A',
+    '--color-danger':         '#CC4444',
+  },
+}

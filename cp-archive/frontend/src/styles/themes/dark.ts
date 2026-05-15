@@ -1,0 +1,30 @@
+import type { ThemeConfig } from './types'
+
+export const darkTheme: ThemeConfig = {
+  id: 'dark',
+  name: '深夜黑',
+  description: '深色护眼主题',
+  isDark: true,
+  tokens: {
+    '--color-primary':        '#9B7FCA',
+    '--color-primary-light':  '#B89EE0',
+    '--color-primary-bg':     '#2A2240',
+    '--color-bg-page':        '#1A1826',
+    '--color-bg-card':        '#242133',
+    '--color-bg-sidebar':     '#1E1C2E',
+    '--color-text-title':     '#EEEEF5',
+    '--color-text-body':      '#B8B8D0',
+    '--color-text-secondary': '#6A6A80',
+    '--color-text-disabled':  '#3A3A50',
+    '--color-border':         '#333248',
+    '--color-border-input':   '#3D3C55',
+    '--color-critical':       '#9B7FCA',
+    '--color-high':           '#F5A623',
+    '--color-medium':         '#5B9BD5',
+    '--color-normal':         '#6A6A80',
+    '--color-low':            '#7DC18A',
+    '--color-success':        '#7DC18A',
+    '--color-warning':        '#F5A623',
+    '--color-danger':         '#E05A5A',
+  },
+}

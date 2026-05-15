@@ -29,11 +29,13 @@ import { ref, provide, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCpStore } from '@/stores/cp'
 import { usePermission } from '@/composables/usePermission'
+import { useThemeStore } from '@/stores/theme'
 import DetailNav from '@/components/layout/DetailNav.vue'
 import CpBanner from '@/components/cp/CpBanner.vue'
 
 const route = useRoute()
 const cpStore = useCpStore()
+const themeStore = useThemeStore()
 const { can } = usePermission()
 
 const cpId = route.params.id as string
@@ -46,7 +48,9 @@ provide('currentCpId', cpId)
 async function loadCp(id: string) {
   loading.value = true
   try {
-    await cpStore.fetchById(id)
+    const cp = await cpStore.fetchById(id)
+    // 进入 CP 页面时应用 CP 专属主题
+    themeStore.applyCpTheme(cp.themeConfig as Record<string, unknown> | null)
   } finally {
     loading.value = false
   }
@@ -67,7 +71,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // 离开时清空 currentCp，避免下一个 CP 页面短暂显示旧数据
+  // 离开时恢复全局主题，清空 currentCp
+  themeStore.resetToGlobal()
   cpStore.current = null
 })
 </script>

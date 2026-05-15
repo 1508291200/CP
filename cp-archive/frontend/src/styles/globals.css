@@ -132,3 +132,21 @@ a {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-disabled);
 }
+
+/* ── 富文本渲染样式 ──────────────────────────────────────── */
+.prose-render h1 { font-size: 1.3em; font-weight: 700; margin: 0.5em 0 0.2em; }
+.prose-render h2 { font-size: 1.15em; font-weight: 600; margin: 0.4em 0 0.2em; }
+.prose-render h3 { font-size: 1em; font-weight: 600; margin: 0.3em 0 0.2em; }
+.prose-render p  { margin: 0.3em 0; }
+.prose-render ul { list-style: disc;    padding-left: 1.4em; margin: 0.2em 0; }
+.prose-render ol { list-style: decimal; padding-left: 1.4em; margin: 0.2em 0; }
+.prose-render blockquote {
+  border-left: 3px solid var(--color-primary);
+  padding-left: 0.7em;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin: 0.3em 0;
+}
+.prose-render hr { border: none; border-top: 1px solid var(--color-border); margin: 0.6em 0; }
+.prose-render img { max-width: 100%; border-radius: var(--radius-card); margin: 0.4em 0; }
+.prose-render a { color: var(--color-primary); text-decoration: underline; }

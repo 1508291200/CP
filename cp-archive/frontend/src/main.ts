@@ -15,4 +15,9 @@ import { useUIStore } from './stores/ui'
 const uiStore = useUIStore()
 uiStore.initDark()
 
+// 初始化主题（从 localStorage 恢复用户选择）
+import { useThemeStore } from './stores/theme'
+const themeStore = useThemeStore()
+themeStore.init()
+
 app.mount('#app')

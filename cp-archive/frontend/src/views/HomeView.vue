@@ -12,6 +12,11 @@
           >
             {{ uiStore.isDark ? '☀️' : '🌙' }}
           </button>
+          <button
+            class="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
+            @click="router.push('/settings/theme')"
+            title="主题设置"
+          >🎨</button>
           <div class="flex items-center gap-2">
             <div class="w-7 h-7 rounded-full bg-[var(--color-primary-bg)] flex items-center justify-center text-xs font-medium text-[var(--color-primary)]">
               {{ authStore.user?.displayName?.[0] ?? authStore.user?.username?.[0]?.toUpperCase() }}

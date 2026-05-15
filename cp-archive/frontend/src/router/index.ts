@@ -8,6 +8,8 @@ const CpDetailView  = () => import('@/views/cp/CpDetailView.vue')
 const ProfileTab    = () => import('@/views/cp/ProfileTab.vue')
 const TimelineTab   = () => import('@/views/cp/TimelineTab.vue')
 const MilestoneTab  = () => import('@/views/cp/MilestoneTab.vue')
+const SettingsView  = () => import('@/views/settings/SettingsView.vue')
+const ThemeSettings = () => import('@/views/settings/ThemeSettings.vue')
 
 const router = createRouter({
   history: createWebHistory(),
@@ -46,6 +48,19 @@ const router = createRouter({
           name: 'cp-milestones',
           component: MilestoneTab,
         },
+      ],
+    },
+    // ── 设置页 ────────────────────────────────────────────────
+    {
+      path: '/settings',
+      component: SettingsView,
+      meta: { requiresAuth: true },
+      redirect: '/settings/theme',
+      children: [
+        { path: 'theme',   name: 'settings-theme',   component: ThemeSettings },
+        { path: 'profile', name: 'settings-profile',  component: () => Promise.resolve({ template: '<div class="p-6 text-[var(--color-text-secondary)]">个人资料设置（Phase 8 实现）</div>' }) },
+        { path: 'members', name: 'settings-members',  component: () => Promise.resolve({ template: '<div class="p-6 text-[var(--color-text-secondary)]">成员管理（Phase 8 实现）</div>' }) },
+        { path: 'data',    name: 'settings-data',     component: () => Promise.resolve({ template: '<div class="p-6 text-[var(--color-text-secondary)]">数据管理（Phase 9 实现）</div>' }) },
       ],
     },
   ],

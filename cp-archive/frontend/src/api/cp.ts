@@ -18,6 +18,7 @@ export interface CreateCpPayload {
   status?: string
   visibility?: string
   tagIds?: string[]
+  themeConfig?: Record<string, unknown>
 }
 
 export const cpApi = {

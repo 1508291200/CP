@@ -13,9 +13,14 @@
       >来源 ↗</a>
     </div>
 
-    <!-- 内容区 -->
-    <div class="text-sm text-[var(--color-text-body)] leading-relaxed whitespace-pre-wrap mb-3">
-      {{ summary }}
+    <!-- 内容区：Tiptap JSON 渲染 -->
+    <div
+      v-if="renderedHtml"
+      class="prose-render text-sm text-[var(--color-text-body)] leading-relaxed mb-3"
+      v-html="renderedHtml"
+    />
+    <div v-else-if="plainText" class="text-sm text-[var(--color-text-body)] leading-relaxed whitespace-pre-wrap mb-3">
+      {{ plainText }}
     </div>
 
     <!-- 标签 -->
@@ -50,6 +55,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { generateHTML } from '@tiptap/vue-3'
+import StarterKit from '@tiptap/starter-kit'
+import Image from '@tiptap/extension-image'
+import Link from '@tiptap/extension-link'
 import type { EventItem } from '@/types'
 import ImportanceTag from './ImportanceTag.vue'
 import { usePermission } from '@/composables/usePermission'
@@ -78,11 +87,23 @@ const displayDate = computed(() => {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
 })
 
-// Phase 6 前：从 content 的 text 字段取纯文本，兼容 summary
-const summary = computed(() => {
+// 尝试将 content 渲染为 HTML（Tiptap JSON 格式）
+const renderedHtml = computed<string | null>(() => {
+  const c = props.event.content as Record<string, unknown>
+  if (!c || !c.type) return null  // 不是有效的 Tiptap doc
+  try {
+    return generateHTML(c as Parameters<typeof generateHTML>[0], [StarterKit, Image, Link])
+  } catch {
+    return null
+  }
+})
+
+// 降级为纯文本（兼容旧数据中的 {text: '...'} 格式）
+const plainText = computed<string | null>(() => {
+  if (renderedHtml.value) return null
   const c = props.event.content as Record<string, unknown>
   if (c?.text && typeof c.text === 'string') return c.text
-  return props.event.summary ?? ''
+  return props.event.summary ?? null
 })
 
 async function handleDelete() {
