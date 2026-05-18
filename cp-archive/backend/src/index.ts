@@ -32,11 +32,16 @@ const app = new Hono()
 
 // ── 全局中间件 ─────────────────────────────────────────
 app.use('*', loggerMiddleware)
+// 开发环境允许所有来源；生产环境从 ALLOWED_ORIGINS 环境变量读取
+const corsOrigin = config.NODE_ENV === 'development'
+  ? '*'
+  : config.ALLOWED_ORIGINS
+
 app.use('/api/*', cors({
-  origin:       config.NODE_ENV === 'development' ? '*' : [],
+  origin:       corsOrigin,
   allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
-  credentials:  true,
+  credentials:  config.NODE_ENV !== 'development',
 }))
 
 // ── 路由注册 ───────────────────────────────────────────

@@ -1,11 +1,8 @@
 /**
  * 文件上传中间件（Multer 配置）
- * 白名单校验 + 磁盘存储 + 路径按日期组织
+ * 白名单校验 + 内存存储（文件由 storage 抽象层负责持久化）
  */
 import multer from 'multer'
-import path from 'node:path'
-import { randomUUID } from 'node:crypto'
-import { getConfig } from '../config/index.js'
 import { AppError } from '../shared/errors.js'
 
 const ALLOWED_MIME = new Set([
@@ -17,24 +14,8 @@ const ALLOWED_MIME = new Set([
 
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
 
-function buildUploadPath(): string {
-  const now   = new Date()
-  const year  = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const config = getConfig()
-  return path.join(config.UPLOAD_DIR, 'originals', String(year), month)
-}
-
 export const upload = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => {
-      cb(null, buildUploadPath())
-    },
-    filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname).toLowerCase()
-      cb(null, `${randomUUID()}${ext}`)
-    },
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: MAX_SIZE },
   fileFilter: (_req, file, cb) => {
     if (!ALLOWED_MIME.has(file.mimetype)) {
@@ -45,10 +26,14 @@ export const upload = multer({
   },
 })
 
-/** 为上传路径创建目录（应用启动时调用） */
+/** 保持向后兼容：本地模式下确保目录存在（不影响 r2 模式） */
 export async function ensureUploadDirs() {
-  const { mkdirSync } = await import('node:fs')
+  const { getConfig } = await import('../config/index.js')
   const config = getConfig()
+  if (config.STORAGE_DRIVER !== 'local') return
+
+  const { mkdirSync } = await import('node:fs')
+  const path = await import('node:path')
   const dirs = [
     path.join(config.UPLOAD_DIR, 'originals'),
     path.join(config.UPLOAD_DIR, 'thumbs'),

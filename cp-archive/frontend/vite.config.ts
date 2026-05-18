@@ -22,11 +22,11 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    // 确保单页应用路由正确（Zeabur 静态托管需要）
     rollupOptions: {
       output: {
-        // 按模块分包，优化加载性能
         manualChunks: {
-          vue: ['vue', 'vue-router', 'pinia'],
+          vue:   ['vue', 'vue-router', 'pinia'],
           axios: ['axios'],
         },
       },

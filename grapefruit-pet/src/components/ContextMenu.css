@@ -1,0 +1,76 @@
+/* 右键菜单样式 - 简洁紧凑 */
+
+.context-menu {
+  position: absolute; /* 改为相对于窗口定位 */
+  min-width: 140px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  padding: 4px;
+  z-index: 999999;
+  font-size: 13px;
+  animation: menuFadeIn 0.15s ease;
+  -webkit-app-region: no-drag;
+  pointer-events: auto;
+}
+
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.menu-header {
+  padding: 8px 12px;
+  font-weight: 600;
+  color: #FF8FA0;
+  font-size: 14px;
+  text-align: center;
+}
+
+.menu-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+  margin: 4px 0;
+}
+
+.menu-section {
+  padding: 2px 0;
+}
+
+.menu-label {
+  padding: 6px 12px;
+  font-size: 11px;
+  color: #999;
+  font-weight: 500;
+}
+
+.menu-item {
+  width: 100%;
+  padding: 6px 12px;
+  text-align: left;
+  color: #333;
+  transition: background 0.15s ease;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.menu-item:hover {
+  background: rgba(255, 143, 160, 0.1);
+  color: #FF8FA0;
+}
+
+.menu-item:active {
+  background: rgba(255, 143, 160, 0.2);
+}
