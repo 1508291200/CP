@@ -101,8 +101,8 @@ app.onError((err, c) => {
 serve({ fetch: app.fetch, port: config.PORT }, (info) => {
   console.log(`\x1b[36m[Server]\x1b[0m http://localhost:${info.port} (${config.NODE_ENV})`)
   console.log(`\x1b[36m[Server]\x1b[0m Version: ${config.VERSION}`)
-  // 启动图片处理 Worker
-  startImageWorker()
+  // 异步启动图片处理 Worker（无 Redis 时自动降级为同步模式）
+  startImageWorker().catch((err: Error) => console.error('[Worker] Failed to start:', err.message))
 })
 
 export default app
