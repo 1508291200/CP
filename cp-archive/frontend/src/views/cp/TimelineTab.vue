@@ -32,6 +32,16 @@
         @click="toggleOrder"
       >{{ order === 'desc' ? '↓ 倒序' : '↑ 正序' }}</button>
 
+      <!-- 批量模式切换 -->
+      <button
+        v-if="can('event:edit:own')"
+        class="text-xs border px-2.5 py-1 rounded-[var(--radius-btn)] transition-colors"
+        :class="batchMode
+          ? 'border-[var(--color-primary)] bg-[var(--color-primary-bg)] text-[var(--color-primary)]'
+          : 'border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)]'"
+        @click="toggleBatchMode"
+      >☑ 批量</button>
+
       <!-- 新增按钮 -->
       <div class="flex gap-2 ml-auto">
         <Button v-if="can('event:create')" size="sm" variant="ghost" @click="showQuickInput = !showQuickInput">
@@ -42,6 +52,33 @@
         </Button>
       </div>
     </div>
+
+    <!-- 批量操作工具栏 -->
+    <Transition name="slide-down">
+      <div
+        v-if="batchMode"
+        class="flex items-center gap-3 mb-4 px-4 py-2.5 rounded-[var(--radius-card)] bg-[var(--color-primary-bg)] border border-[var(--color-primary)] flex-wrap"
+      >
+        <span class="text-xs text-[var(--color-primary)] font-medium">
+          已选 {{ selectedIds.size }} 条
+        </span>
+        <button class="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]" @click="selectAll">全选</button>
+        <button class="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]" @click="selectedIds.clear()">取消</button>
+
+        <div class="flex items-center gap-2 ml-auto flex-wrap">
+          <!-- 批量设置重要性 -->
+          <select
+            v-model="batchImportance"
+            class="text-xs border border-[var(--color-border)] rounded-[var(--radius-input)] px-2 py-1 bg-[var(--color-bg-card)] text-[var(--color-text-body)]"
+          >
+            <option value="">设置重要性…</option>
+            <option v-for="opt in importanceOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+          </select>
+          <Button size="sm" :disabled="!selectedIds.size || !batchImportance" @click="executeBatchImportance">确认</Button>
+          <Button size="sm" variant="ghost" :disabled="!selectedIds.size" class="text-[var(--color-danger)]!" @click="executeBatchDelete">删除选中</Button>
+        </div>
+      </div>
+    </Transition>
 
     <!-- 已激活的筛选条件 badge -->
     <div v-if="activeFilters.length" class="flex gap-2 mb-4 flex-wrap">
@@ -79,10 +116,14 @@
       :events="events"
       :cp-id="cpId"
       :can-create="can('event:create')"
+      :batch-mode="batchMode"
+      :selected-ids="selectedIds"
       @add-event="openCreateModal"
       @edit="openEditModal"
       @deleted="onDeleted"
       @milestone-toggled="onMilestoneToggled"
+      @toggle-select="toggleSelect"
+      @show-history="openVersionDrawer"
     />
   </div>
 
@@ -94,18 +135,31 @@
     :event="editingEvent"
     @saved="onEventSaved"
   />
+
+  <!-- 版本历史抽屉 -->
+  <VersionDrawer
+    v-if="versionEventId"
+    :visible="showVersionDrawer"
+    :cp-id="cpId"
+    :event-id="versionEventId"
+    @close="showVersionDrawer = false"
+    @restored="onVersionRestored"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, reactive, onMounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useEventStore } from '@/stores/event'
 import { useEvent } from '@/composables/useEvent'
 import { usePermission } from '@/composables/usePermission'
+import { useToast } from '@/composables/useToast'
+import { eventApi } from '@/api/event'
 import Button from '@/components/base/Button.vue'
 import Timeline from '@/components/timeline/Timeline.vue'
 import QuickInput from '@/components/timeline/QuickInput.vue'
 import EventFormModal from '@/components/timeline/EventFormModal.vue'
+import VersionDrawer from '@/components/timeline/VersionDrawer.vue'
 import type { CpItem, EventItem } from '@/types'
 
 const props = defineProps<{ cp?: CpItem | null; cpId: string }>()
@@ -114,6 +168,7 @@ const route      = useRoute()
 const eventStore = useEventStore()
 const { toggleMilestone } = useEvent(props.cpId)
 const { can }    = usePermission()
+const toast      = useToast()
 
 const showQuickInput = ref(false)
 const showFormModal  = ref(false)
@@ -122,6 +177,72 @@ const filterKeyword  = ref('')
 const activeImportance = ref<string>('')
 const order          = ref<'asc' | 'desc'>('desc')
 
+// ── 批量模式 ─────────────────────────────────────────────
+const batchMode      = ref(false)
+const selectedIds    = reactive(new Set<string>())
+const batchImportance = ref('')
+
+function toggleBatchMode() {
+  batchMode.value = !batchMode.value
+  if (!batchMode.value) {
+    selectedIds.clear()
+    batchImportance.value = ''
+  }
+}
+
+function toggleSelect(id: string) {
+  if (selectedIds.has(id)) selectedIds.delete(id)
+  else selectedIds.add(id)
+}
+
+function selectAll() {
+  events.value.forEach(e => selectedIds.add(e.id))
+}
+
+async function executeBatchImportance() {
+  if (!selectedIds.size || !batchImportance.value) return
+  try {
+    await eventApi.batchUpdate(props.cpId, {
+      ids: [...selectedIds],
+      importance: batchImportance.value,
+    })
+    await eventStore.fetchList(props.cpId, { order: order.value })
+    toast.success(`已批量设置 ${selectedIds.size} 条`)
+    selectedIds.clear()
+    batchImportance.value = ''
+  } catch {
+    toast.error('批量操作失败')
+  }
+}
+
+async function executeBatchDelete() {
+  if (!selectedIds.size) return
+  if (!confirm(`确认删除选中的 ${selectedIds.size} 条事件？`)) return
+  try {
+    await eventApi.batchDelete(props.cpId, [...selectedIds])
+    await eventStore.fetchList(props.cpId, { order: order.value })
+    toast.success('批量删除成功')
+    selectedIds.clear()
+  } catch {
+    toast.error('批量删除失败')
+  }
+}
+
+// ── 版本历史 ─────────────────────────────────────────────
+const showVersionDrawer = ref(false)
+const versionEventId    = ref('')
+
+function openVersionDrawer(event: EventItem) {
+  versionEventId.value    = event.id
+  showVersionDrawer.value = true
+}
+
+async function onVersionRestored() {
+  showVersionDrawer.value = false
+  await eventStore.fetchList(props.cpId, { order: order.value })
+}
+
+// ── 筛选 ─────────────────────────────────────────────────
 const importanceOptions = [
   { value: 'critical', label: '核心' },
   { value: 'high',     label: '重要' },
@@ -196,17 +317,13 @@ function openEditModal(event: EventItem) {
   showFormModal.value = true
 }
 
-function onDeleted(_id: string) {
-  // store 已处理，无需额外操作
-}
+function onDeleted(_id: string) {}
 
 function onMilestoneToggled(id: string, value: boolean) {
   toggleMilestone(id, value)
 }
 
-function onQuickSaved() {
-  // 快速录入保存后轻振感反馈，不需要重新加载（store 已更新）
-}
+function onQuickSaved() {}
 
 function onEventSaved() {
   showFormModal.value = false
@@ -214,14 +331,32 @@ function onEventSaved() {
 }
 
 // 支持从大事记页跳转并高亮某事件
+const highlightEventId = ref<string>('')
 const jumpEventId = computed(() => route.query.eventId as string | undefined)
-watch(jumpEventId, (id) => {
-  if (id) eventStore.selectEvent(id)
+
+async function scrollToEvent(id: string) {
+  highlightEventId.value = id
+  await nextTick()
+  const el = document.querySelector(`[data-event-id="${id}"]`) as HTMLElement | null
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    setTimeout(() => { highlightEventId.value = '' }, 2000)
+  }
+}
+
+watch(jumpEventId, async (id) => {
+  if (id) {
+    eventStore.selectEvent(id)
+    await scrollToEvent(id)
+  }
 })
 
 onMounted(async () => {
   await eventStore.fetchList(props.cpId, { order: 'desc' })
-  if (jumpEventId.value) eventStore.selectEvent(jumpEventId.value)
+  if (jumpEventId.value) {
+    eventStore.selectEvent(jumpEventId.value)
+    await scrollToEvent(jumpEventId.value)
+  }
 })
 </script>
 

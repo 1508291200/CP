@@ -21,12 +21,12 @@
       </div>
 
       <!-- 中部：Tab 导航 -->
-      <div class="flex items-center gap-0 flex-shrink-0">
+      <div class="flex items-center gap-0 flex-shrink-0 overflow-x-auto">
         <RouterLink
-          v-for="tab in tabs"
+          v-for="tab in allTabs"
           :key="tab.to"
           :to="`/cp/${cpId}/${tab.to}`"
-          class="relative px-4 py-4 text-sm transition-colors"
+          class="relative px-4 py-4 text-sm transition-colors whitespace-nowrap"
           :class="isActive(tab.to)
             ? 'text-[var(--color-primary)] font-medium'
             : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-body)]'"
@@ -48,8 +48,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { cpApi, type CpTab } from '@/api/cp'
 import type { CpItem } from '@/types'
 
 interface Props {
@@ -57,23 +58,46 @@ interface Props {
   cp?: CpItem | null
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
-const router = useRouter()
-const route = useRoute()
+const router   = useRouter()
+const route    = useRoute()
 const scrolled = ref(false)
 
-const tabs = [
+// 固定 tab
+const baseTabs = [
   { label: '人物简介', to: 'profile' },
   { label: '时间轴',   to: 'timeline' },
   { label: '大事记',   to: 'milestones' },
 ]
 
+// 动态自定义 tab
+const customTabs = ref<CpTab[]>([])
+
+async function loadCustomTabs() {
+  try {
+    const res = await cpApi.listTabs(props.cpId)
+    customTabs.value = (res.data ?? []).filter(t => t.isVisible && t.tabType === 'custom')
+  } catch {
+    customTabs.value = []
+  }
+}
+
+const allTabs = computed(() => [
+  ...baseTabs,
+  ...customTabs.value.map(t => ({ label: t.name, to: `custom/${t.id}` })),
+])
+
 function isActive(tabTo: string) {
-  return route.path.endsWith(tabTo)
+  return route.path.includes(`/${tabTo}`)
 }
 
 function onScroll() { scrolled.value = window.scrollY > 0 }
-onMounted(() => window.addEventListener('scroll', onScroll))
+onMounted(() => {
+  window.addEventListener('scroll', onScroll)
+  loadCustomTabs()
+})
 onUnmounted(() => window.removeEventListener('scroll', onScroll))
+
+watch(() => props.cpId, loadCustomTabs)
 </script>

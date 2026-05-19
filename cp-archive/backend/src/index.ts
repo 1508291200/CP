@@ -25,6 +25,8 @@ import { buildCharacterRouter } from './modules/character/character.routes.js'
 import { buildMilestoneRouter } from './modules/milestone/milestone.routes.js'
 import { buildMediaRouter } from './modules/media/media.routes.js'
 import { buildSettingsRouter } from './modules/settings/settings.routes.js'
+import { buildUserRouter } from './modules/user/user.routes.js'
+import { buildDataRouter } from './modules/data/data.routes.js'
 import { startImageWorker } from './jobs/queue.js'
 
 const config = getConfig()
@@ -32,16 +34,11 @@ const app = new Hono()
 
 // ── 全局中间件 ─────────────────────────────────────────
 app.use('*', loggerMiddleware)
-// 开发环境允许所有来源；生产环境从 ALLOWED_ORIGINS 环境变量读取
-const corsOrigin = config.NODE_ENV === 'development'
-  ? '*'
-  : config.ALLOWED_ORIGINS
-
 app.use('/api/*', cors({
-  origin:       corsOrigin,
+  origin:       config.NODE_ENV === 'development' ? '*' : [],
   allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
-  credentials:  config.NODE_ENV !== 'development',
+  credentials:  true,
 }))
 
 // ── 路由注册 ───────────────────────────────────────────
@@ -68,6 +65,14 @@ api.route('/media', buildMediaRouter())
 // 站点设置（GET 需登录，PATCH 需 admin+）
 api.use('/settings/*', authMiddleware)
 api.route('/settings', buildSettingsRouter())
+
+// 用户管理（全部需要登录，各接口内部再做权限校验）
+api.use('/users/*', authMiddleware)
+api.route('/users', buildUserRouter())
+
+// 数据管理（导入/导出/清空，需登录）
+api.use('/data/*', authMiddleware)
+api.route('/data', buildDataRouter())
 
 app.route('/api/v1', api)
 
@@ -101,8 +106,8 @@ app.onError((err, c) => {
 serve({ fetch: app.fetch, port: config.PORT }, (info) => {
   console.log(`\x1b[36m[Server]\x1b[0m http://localhost:${info.port} (${config.NODE_ENV})`)
   console.log(`\x1b[36m[Server]\x1b[0m Version: ${config.VERSION}`)
-  // 异步启动图片处理 Worker（无 Redis 时自动降级为同步模式）
-  startImageWorker().catch((err: Error) => console.error('[Worker] Failed to start:', err.message))
+  // 启动图片处理 Worker
+  startImageWorker()
 })
 
 export default app

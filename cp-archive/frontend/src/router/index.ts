@@ -4,12 +4,17 @@ import { useAuthStore } from '@/stores/auth'
 // 懒加载所有页面组件
 const HomeView      = () => import('@/views/HomeView.vue')
 const LoginView     = () => import('@/views/auth/LoginView.vue')
+const RegisterView  = () => import('@/views/auth/RegisterView.vue')
 const CpDetailView  = () => import('@/views/cp/CpDetailView.vue')
 const ProfileTab    = () => import('@/views/cp/ProfileTab.vue')
 const TimelineTab   = () => import('@/views/cp/TimelineTab.vue')
 const MilestoneTab  = () => import('@/views/cp/MilestoneTab.vue')
-const SettingsView  = () => import('@/views/settings/SettingsView.vue')
-const ThemeSettings = () => import('@/views/settings/ThemeSettings.vue')
+const CustomTab     = () => import('@/views/cp/CustomTab.vue')
+const SettingsView      = () => import('@/views/settings/SettingsView.vue')
+const ThemeSettings     = () => import('@/views/settings/ThemeSettings.vue')
+const ProfileSettings   = () => import('@/views/settings/ProfileSettings.vue')
+const MembersSettings   = () => import('@/views/settings/MembersSettings.vue')
+const DataSettings      = () => import('@/views/settings/DataSettings.vue')
 
 const router = createRouter({
   history: createWebHistory(),
@@ -24,6 +29,12 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView,
+      meta: { requiresAuth: false },
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: RegisterView,
       meta: { requiresAuth: false },
     },
     // ── CP 详情页（嵌套路由） ─────────────────────────────
@@ -48,6 +59,11 @@ const router = createRouter({
           name: 'cp-milestones',
           component: MilestoneTab,
         },
+        {
+          path: 'custom/:tabId',
+          name: 'cp-custom-tab',
+          component: CustomTab,
+        },
       ],
     },
     // ── 设置页 ────────────────────────────────────────────────
@@ -58,9 +74,9 @@ const router = createRouter({
       redirect: '/settings/theme',
       children: [
         { path: 'theme',   name: 'settings-theme',   component: ThemeSettings },
-        { path: 'profile', name: 'settings-profile',  component: () => Promise.resolve({ template: '<div class="p-6 text-[var(--color-text-secondary)]">个人资料设置（Phase 8 实现）</div>' }) },
-        { path: 'members', name: 'settings-members',  component: () => Promise.resolve({ template: '<div class="p-6 text-[var(--color-text-secondary)]">成员管理（Phase 8 实现）</div>' }) },
-        { path: 'data',    name: 'settings-data',     component: () => Promise.resolve({ template: '<div class="p-6 text-[var(--color-text-secondary)]">数据管理（Phase 9 实现）</div>' }) },
+        { path: 'profile', name: 'settings-profile',  component: ProfileSettings },
+        { path: 'members', name: 'settings-members',  component: MembersSettings },
+        { path: 'data',    name: 'settings-data',     component: DataSettings },
       ],
     },
   ],

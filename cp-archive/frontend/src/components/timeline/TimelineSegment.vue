@@ -10,9 +10,13 @@
         :key="event.id"
         :event="event"
         :cp-id="cpId"
+        :batch-mode="batchMode"
+        :selected="selectedIds?.has(event.id)"
         @edit="$emit('edit', $event)"
         @deleted="$emit('deleted', $event)"
         @milestone-toggled="(id: string, val: boolean) => $emit('milestone-toggled', id, val)"
+        @toggle-select="$emit('toggle-select', $event)"
+        @show-history="$emit('show-history', $event)"
       />
     </div>
 
@@ -36,12 +40,16 @@ const props = defineProps<{
   events:   EventItem[]
   cpId:     string
   collapseThreshold?: number
+  batchMode?: boolean
+  selectedIds?: Set<string>
 }>()
 
 defineEmits<{
   edit:               [event: EventItem]
   deleted:            [id: string]
   'milestone-toggled': [id: string, value: boolean]
+  'toggle-select':    [id: string]
+  'show-history':     [event: EventItem]
 }>()
 
 const threshold = computed(() => props.collapseThreshold ?? 4)

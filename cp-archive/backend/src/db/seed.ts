@@ -51,7 +51,7 @@ async function seed() {
     { key: 'site_description', value: '记录每一份心动的轨迹' },
     { key: 'registration',     value: 'invite_only' }, // open | invite_only | closed
     { key: 'global_theme',     value: { preset: 'default', customVars: {} } },
-    { key: 'last_backup_at',   value: null },
+    { key: 'last_backup_at',   value: '' },
   ]
 
   for (const setting of defaultSettings) {

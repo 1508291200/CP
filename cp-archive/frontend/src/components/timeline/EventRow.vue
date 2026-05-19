@@ -2,13 +2,27 @@
   <div>
     <!-- 事件行 -->
     <div
+      :data-event-id="event.id"
       class="flex items-start gap-3 px-4 py-3 rounded-[var(--radius-card)] cursor-pointer transition-colors group"
-      :class="isExpanded ? 'bg-[var(--color-primary-bg)]' : 'hover:bg-[var(--color-bg-page)]'"
-      @click="toggle"
+      :class="[
+        isExpanded ? 'bg-[var(--color-primary-bg)]' : 'hover:bg-[var(--color-bg-page)]',
+        highlighted ? 'ring-2 ring-[var(--color-primary)] ring-offset-1' : '',
+        batchMode && selected ? 'bg-[var(--color-primary-bg)]' : '',
+      ]"
+      @click="batchMode ? emit('toggle-select', event.id) : toggle()"
       @contextmenu.prevent="showCtxMenu = !showCtxMenu"
     >
-      <!-- 轴节点 -->
-      <div class="flex-shrink-0 mt-1 w-3 h-3 rounded-full border-2 border-[var(--color-primary)] bg-[var(--color-bg-card)] ring-2 ring-[var(--color-bg-card)]" />
+      <!-- 批量选择 checkbox -->
+      <input
+        v-if="batchMode"
+        type="checkbox"
+        :checked="selected"
+        class="mt-1 flex-shrink-0 accent-[var(--color-primary)] w-4 h-4"
+        @click.stop
+        @change="emit('toggle-select', event.id)"
+      />
+      <!-- 轴节点（非批量模式显示） -->
+      <div v-else class="flex-shrink-0 mt-1 w-3 h-3 rounded-full border-2 border-[var(--color-primary)] bg-[var(--color-bg-card)] ring-2 ring-[var(--color-bg-card)]" />
 
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 flex-wrap">
@@ -41,6 +55,7 @@
         @edit="$emit('edit', event)"
         @deleted="$emit('deleted', event.id)"
         @milestone-toggled="$emit('milestone-toggled', event.id, $event)"
+        @show-history="$emit('show-history', event)"
       />
     </Transition>
 
@@ -69,12 +84,17 @@ const props = defineProps<{
   event: EventItem
   cpId: string
   compact?: boolean
+  highlighted?: boolean
+  batchMode?: boolean
+  selected?: boolean
 }>()
 
 const emit = defineEmits<{
   edit:             [event: EventItem]
   deleted:          [id: string]
   'milestone-toggled': [id: string, value: boolean]
+  'toggle-select':  [id: string]
+  'show-history':   [event: EventItem]
 }>()
 
 const isExpanded  = ref(false)

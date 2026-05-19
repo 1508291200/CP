@@ -26,13 +26,15 @@ export async function getSetting(key: string): Promise<unknown | null> {
 /** 更新单个设置（upsert） */
 export async function setSetting(key: string, value: unknown, updatedBy?: string) {
   const db = getDb()
+  // jsonb NOT NULL：将 JS null 转为空字符串，避免触发约束
+  const safeValue = value === null ? '' : value
   await db
     .insert(siteSettings)
-    .values({ key, value: value as Record<string, unknown>, updatedBy: updatedBy ?? null })
+    .values({ key, value: safeValue as Record<string, unknown>, updatedBy: updatedBy ?? null })
     .onConflictDoUpdate({
       target: siteSettings.key,
       set: {
-        value:     value as Record<string, unknown>,
+        value:     safeValue as Record<string, unknown>,
         updatedBy: updatedBy ?? null,
         updatedAt: new Date(),
       },

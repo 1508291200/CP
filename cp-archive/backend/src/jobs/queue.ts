@@ -1,72 +1,85 @@
 /**
  * 图片处理任务队列（BullMQ）
- * - 有 Redis：异步队列处理缩略图
- * - 无 Redis（REDIS_URL=disabled）：同步处理
+ * 与 Redis 连接，创建 image-processing 队列
  */
+import { Queue, Worker } from 'bullmq'
 import sharp from 'sharp'
+import path from 'node:path'
+import fs from 'node:fs/promises'
 import { getConfig } from '../config/index.js'
 import { getDb } from '../db/connection.js'
 import { media } from '../db/schema/index.js'
 import { eq } from 'drizzle-orm'
-import { storagePut } from '../shared/storage.js'
 
 export interface ImageJobData {
-  mediaId:    string
-  fileBuffer: string   // base64
-  thumbKey:   string
+  mediaId:      string
+  originalPath: string
+  thumbDir:     string
 }
 
-// ── 核心处理逻辑（共享）────────────────────────────────
-export async function processImageJob(data: ImageJobData) {
-  const { mediaId, fileBuffer, thumbKey } = data
-  const inputBuffer = Buffer.from(fileBuffer, 'base64')
-
-  const outBuffer = await sharp(inputBuffer)
-    .resize({ width: 800, withoutEnlargement: true })
-    .webp({ quality: 82 })
-    .toBuffer({ resolveWithObject: true })
-
-  await storagePut(thumbKey, outBuffer.data, 'image/webp')
-
-  const db = getDb()
-  await db
-    .update(media)
-    .set({
-      thumbPath: thumbKey,
-      width:     outBuffer.info.width,
-      height:    outBuffer.info.height,
-    })
-    .where(eq(media.id, mediaId))
-}
-
-// ── 队列（懒加载，仅有 Redis 时使用）─────────────────
-let _queue: import('bullmq').Queue<ImageJobData> | null = null
-
-export async function getImageQueue() {
-  if (_queue) return _queue
+/** 根据 REDIS_URL 解析出 BullMQ connection 配置，支持 rediss:// TLS */
+function getBullMQConnection() {
   const config = getConfig()
-  const { Queue } = await import('bullmq')
-  _queue = new Queue<ImageJobData>('image-processing', {
-    connection: { host: config.REDIS_HOST, port: config.REDIS_PORT },
-  })
-  return _queue
-}
-
-// ── 启动 Worker（仅有 Redis 时调用）──────────────────
-export async function startImageWorker() {
-  const config = getConfig()
-
-  if (!config.REDIS_URL || config.REDIS_URL === 'disabled') {
-    console.warn('[ImageWorker] Redis not available — thumbnail generation will run synchronously')
-    return null
+  const url = new URL(config.REDIS_URL)
+  const tls = url.protocol === 'rediss:'
+  return {
+    host:     url.hostname,
+    port:     parseInt(url.port || '6379', 10),
+    username: url.username || undefined,
+    password: url.password ? decodeURIComponent(url.password) : undefined,
+    tls:      tls ? {} : undefined,
   }
+}
 
-  const { Worker } = await import('bullmq')
+let imageQueue: Queue<ImageJobData> | null = null
+
+export function getImageQueue(): Queue<ImageJobData> {
+  if (!imageQueue) {
+    imageQueue = new Queue<ImageJobData>('image-processing', {
+      connection: getBullMQConnection(),
+    })
+  }
+  return imageQueue
+}
+
+/**
+ * 启动 Worker（在应用启动时调用一次）
+ */
+export function startImageWorker() {
+  const config = getConfig()
+
   const worker = new Worker<ImageJobData>(
     'image-processing',
-    (job) => processImageJob(job.data),
+    async (job) => {
+      const { mediaId, originalPath, thumbDir } = job.data
+
+      // 生成缩略图路径（同目录层级，thumbs 文件夹）
+      const ext      = path.extname(originalPath)
+      const basename = path.basename(originalPath, ext)
+      const thumbPath = path.join(thumbDir, `${basename}_thumb.webp`)
+
+      // 确保目录存在
+      await fs.mkdir(thumbDir, { recursive: true })
+
+      // Sharp 处理：宽度 800px，WebP 格式
+      const meta = await sharp(originalPath)
+        .resize({ width: 800, withoutEnlargement: true })
+        .webp({ quality: 82 })
+        .toFile(thumbPath)
+
+      // 更新数据库记录
+      const db = getDb()
+      await db
+        .update(media)
+        .set({
+          thumbPath,
+          width:  meta.width,
+          height: meta.height,
+        })
+        .where(eq(media.id, mediaId))
+    },
     {
-      connection: { host: config.REDIS_HOST, port: config.REDIS_PORT },
+      connection: getBullMQConnection(),
       concurrency: 3,
     },
   )
@@ -75,6 +88,5 @@ export async function startImageWorker() {
     console.error(`[ImageWorker] Job ${job?.id} failed:`, err.message)
   })
 
-  console.log('[ImageWorker] Started')
   return worker
 }

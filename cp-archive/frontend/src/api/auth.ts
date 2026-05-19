@@ -10,8 +10,9 @@ export interface LoginInput {
 }
 
 export interface RegisterInput {
-  username: string
-  password: string
+  username:   string
+  email:      string
+  password:   string
   inviteCode: string
 }
 
@@ -29,8 +30,11 @@ export interface LoginResult {
 }
 
 export const authApi = {
-  login: (data: LoginInput) => api.post<LoginResult>('/auth/login', data),
-  refresh: () => api.post<{ accessToken: string }>('/auth/refresh'),
-  logout: () => api.post<void>('/auth/logout'),
+  login:    (data: LoginInput) => api.post<LoginResult>('/auth/login', data),
+  refresh:  () => api.post<{ accessToken: string }>('/auth/refresh'),
+  logout:   () => api.post<void>('/auth/logout'),
   register: (data: RegisterInput) => api.post<AuthUser>('/auth/register', data),
 }
+
+// 具名导出供 RegisterView 直接使用
+export const register = (data: RegisterInput) => authApi.register(data)

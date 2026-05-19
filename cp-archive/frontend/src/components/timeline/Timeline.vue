@@ -10,7 +10,7 @@
     <!-- 时间轴内容 -->
     <div v-else class="space-y-6">
       <div v-for="seg in segments" :key="seg.label">
-        <!-- 年份锚点标题（吸顶效果由 TimelineTab 处理） -->
+        <!-- 年份锚点标题 -->
         <div class="flex items-center gap-3 mb-3">
           <span
             class="text-sm font-semibold text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] px-2 py-0.5 rounded"
@@ -23,9 +23,13 @@
         <TimelineSegment
           :events="seg.events"
           :cp-id="cpId"
+          :batch-mode="batchMode"
+          :selected-ids="selectedIds"
           @edit="$emit('edit', $event)"
           @deleted="$emit('deleted', $event)"
           @milestone-toggled="(id: string, val: boolean) => $emit('milestone-toggled', id, val)"
+          @toggle-select="$emit('toggle-select', $event)"
+          @show-history="$emit('show-history', $event)"
         />
       </div>
     </div>
@@ -42,13 +46,17 @@ const props = defineProps<{
   events:    EventItem[]
   cpId:      string
   canCreate?: boolean
+  batchMode?: boolean
+  selectedIds?: Set<string>
 }>()
 
 defineEmits<{
-  'add-event':          []
-  edit:                 [event: EventItem]
-  deleted:              [id: string]
-  'milestone-toggled':  [id: string, value: boolean]
+  'add-event':         []
+  edit:                [event: EventItem]
+  deleted:             [id: string]
+  'milestone-toggled': [id: string, value: boolean]
+  'toggle-select':     [id: string]
+  'show-history':      [event: EventItem]
 }>()
 
 interface Segment {
@@ -56,7 +64,6 @@ interface Segment {
   events: EventItem[]
 }
 
-// 按年份分组
 const segments = computed<Segment[]>(() => {
   const map = new Map<string, EventItem[]>()
 
@@ -69,7 +76,6 @@ const segments = computed<Segment[]>(() => {
     map.get(label)!.push(ev)
   }
 
-  // 已知年份降序，「日期未知」放最后
   const known = [...map.entries()]
     .filter(([k]) => k !== '日期未知')
     .sort(([a], [b]) => Number(b) - Number(a))

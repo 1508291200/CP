@@ -4,6 +4,11 @@
     <DetailNav :cp-id="cpId" :cp="cpStore.current">
       <template #actions>
         <button
+          class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-body)] transition-colors text-sm"
+          :title="uiStore.isDark ? '切换到浅色' : '切换到深色'"
+          @click="uiStore.toggleDark()"
+        >{{ uiStore.isDark ? '☀️' : '🌙' }}</button>
+        <button
           v-if="can('cp:create')"
           class="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
           @click="showEditModal = true"
@@ -30,12 +35,14 @@ import { useRoute } from 'vue-router'
 import { useCpStore } from '@/stores/cp'
 import { usePermission } from '@/composables/usePermission'
 import { useThemeStore } from '@/stores/theme'
+import { useUIStore } from '@/stores/ui'
 import DetailNav from '@/components/layout/DetailNav.vue'
 import CpBanner from '@/components/cp/CpBanner.vue'
 
 const route = useRoute()
 const cpStore = useCpStore()
 const themeStore = useThemeStore()
+const uiStore = useUIStore()
 const { can } = usePermission()
 
 const cpId = route.params.id as string

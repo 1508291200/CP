@@ -164,8 +164,10 @@ export const api = {
     request<T>({ method: 'POST', url, data }),
   patch: <T>(url: string, data?: unknown) =>
     request<T>({ method: 'PATCH', url, data }),
-  delete: <T = void>(url: string) =>
-    request<T>({ method: 'DELETE', url }),
+  put: <T>(url: string, data?: unknown) =>
+    request<T>({ method: 'PUT', url, data }),
+  delete: <T = void>(url: string, data?: unknown) =>
+    request<T>({ method: 'DELETE', url, data }),
 }
 
 export default apiClient

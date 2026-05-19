@@ -5,6 +5,19 @@
     @update:visible="$emit('update:visible', $event)"
   >
     <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
+      <!-- 从模板创建（仅新增模式） -->
+      <div v-if="!isEdit && templates.length" class="flex items-center gap-2">
+        <span class="text-xs text-[var(--color-text-secondary)] flex-shrink-0">从模板：</span>
+        <div class="flex gap-1.5 flex-wrap">
+          <button
+            v-for="tpl in templates"
+            :key="tpl.name"
+            type="button"
+            class="px-2.5 py-1 text-xs rounded-[var(--radius-btn)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
+            @click="applyTemplate(tpl)"
+          >{{ tpl.emotionIcon ? tpl.emotionIcon + ' ' : '' }}{{ tpl.name }}</button>
+        </div>
+      </div>
       <!-- 标题 -->
       <Input
         v-model="form.title"
@@ -117,6 +130,7 @@ import BlockEditor from '@/components/editor/BlockEditor.vue'
 import { useEvent } from '@/composables/useEvent'
 import { ApiClientError } from '@/api/client'
 import { useToast } from '@/composables/useToast'
+import { templateApi, type EventTemplate } from '@/api/event'
 import type { EventItem, Importance } from '@/types'
 
 const props = defineProps<{
@@ -132,6 +146,23 @@ const emit = defineEmits<{
 
 const { createEvent, updateEvent } = useEvent(props.cpId)
 const toast = useToast()
+
+// ── 事件模板 ─────────────────────────────────────────────
+const templates = ref<EventTemplate[]>([])
+
+async function loadTemplates() {
+  try {
+    const res = await templateApi.list()
+    templates.value = res.data ?? []
+  } catch {
+    templates.value = []
+  }
+}
+
+function applyTemplate(tpl: EventTemplate) {
+  if (tpl.importance) form.importance = tpl.importance
+  if (tpl.emotionIcon) form.emotionIcon = tpl.emotionIcon
+}
 
 const isEdit    = computed(() => !!props.event)
 const submitting = ref(false)
@@ -193,6 +224,7 @@ watch(() => props.event, (ev) => {
 let draftTimer: ReturnType<typeof setInterval> | null = null
 
 onMounted(() => {
+  loadTemplates()
   if (!props.event) {
     // 恢复草稿
     try {

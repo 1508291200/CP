@@ -45,6 +45,12 @@
       >{{ event.isMilestone ? '★ 取消里程碑' : '☆ 标记里程碑' }}</button>
 
       <button
+        v-if="can('history:view:others')"
+        class="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
+        @click="$emit('show-history')"
+      >🕐 历史</button>
+
+      <button
         v-if="can('event:delete:own')"
         class="text-xs text-[var(--color-text-disabled)] hover:text-[var(--color-danger)] transition-colors ml-auto"
         @click="handleDelete"
@@ -73,6 +79,7 @@ const emit = defineEmits<{
   edit:               []
   deleted:            [id: string]
   'milestone-toggled': [value: boolean]
+  'show-history':     []
 }>()
 
 const { can } = usePermission()

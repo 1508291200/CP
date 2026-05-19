@@ -82,11 +82,10 @@
         />
       </div>
 
-      <!-- 加载更多 -->
-      <div v-if="cpStore.hasMore" class="text-center mt-8">
-        <Button variant="ghost" :loading="cpStore.loading" @click="loadMore">
-          加载更多 ∨
-        </Button>
+      <!-- 加载更多（IntersectionObserver 自动触发） -->
+      <div ref="sentinel" class="h-4 mt-8" />
+      <div v-if="cpStore.loading && cpStore.list.length" class="text-center py-2">
+        <span class="text-sm text-[var(--color-text-secondary)]">加载中...</span>
       </div>
     </div>
 
@@ -96,7 +95,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCpStore } from '@/stores/cp'
 import { useAuthStore } from '@/stores/auth'
@@ -115,6 +114,7 @@ const { can } = usePermission()
 const showCreateModal = ref(false)
 const searchInput = ref('')
 const currentPage = ref(1)
+const sentinel = ref<HTMLElement>()
 
 // 本地搜索过滤（防抖）
 let debounceTimer: ReturnType<typeof setTimeout>
@@ -129,16 +129,28 @@ watch(searchInput, (val) => {
 const filteredList = computed(() => cpStore.list)
 
 async function loadMore() {
+  if (!cpStore.hasMore || cpStore.loading) return
   currentPage.value++
   await cpStore.fetchList({ q: searchInput.value || undefined, page: currentPage.value, limit: 20 }, true)
 }
+
+// IntersectionObserver 自动加载
+let observer: IntersectionObserver | null = null
+onMounted(() => {
+  cpStore.fetchList({ page: 1, limit: 20 })
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) loadMore()
+    },
+    { rootMargin: '100px' },
+  )
+  if (sentinel.value) observer.observe(sentinel.value)
+})
+onUnmounted(() => observer?.disconnect())
 
 function onCreated() {
   currentPage.value = 1
   cpStore.fetchList({ page: 1, limit: 20 })
 }
-
-onMounted(() => {
-  cpStore.fetchList({ page: 1, limit: 20 })
-})
 </script>

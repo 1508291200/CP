@@ -8,6 +8,7 @@ import {
 } from '../../db/schema/index.js'
 import { NotFoundError } from '../../shared/errors.js'
 import { paginationMeta } from '../../shared/response.js'
+import { MAX_EVENT_VERSIONS } from '../../shared/constants.js'
 import type { CreateEventInput, UpdateEventInput, EventQuery } from './event.schema.js'
 
 export async function listEvents(cpId: string, query: EventQuery) {
@@ -90,6 +91,23 @@ export async function updateEvent(
     editedBy: editedBy ?? null,
   })
 
+  // FIFO：超过上限时删除最旧的版本
+  const versionCount = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(eventVersions)
+    .where(eq(eventVersions.eventId, id))
+  if ((versionCount[0]?.count ?? 0) > MAX_EVENT_VERSIONS) {
+    const oldest = await db
+      .select({ id: eventVersions.id })
+      .from(eventVersions)
+      .where(eq(eventVersions.eventId, id))
+      .orderBy(asc(eventVersions.createdAt))
+      .limit(1)
+    if (oldest[0]) {
+      await db.delete(eventVersions).where(eq(eventVersions.id, oldest[0].id))
+    }
+  }
+
   const { tagIds, ...eventData } = data
   const [updated] = await db
     .update(events)
@@ -133,4 +151,123 @@ export async function toggleMilestone(cpId: string, id: string, mark: boolean) {
   } else {
     await db.delete(milestones).where(eq(milestones.eventId, id))
   }
+}
+
+// ── 版本历史 ──────────────────────────────────────────────
+
+/** 列出某事件的所有历史版本 */
+export async function listEventVersions(cpId: string, eventId: string) {
+  const db = getDb()
+  await getEventById(cpId, eventId) // 确认事件存在且属于该 CP
+  return db
+    .select()
+    .from(eventVersions)
+    .where(eq(eventVersions.eventId, eventId))
+    .orderBy(desc(eventVersions.createdAt))
+}
+
+/** 还原指定版本（将快照重写回 events 表） */
+export async function restoreEventVersion(cpId: string, eventId: string, versionId: string, restoredBy?: string) {
+  const db = getDb()
+  await getEventById(cpId, eventId)
+
+  const [version] = await db
+    .select()
+    .from(eventVersions)
+    .where(and(eq(eventVersions.id, versionId), eq(eventVersions.eventId, eventId)))
+  if (!version) throw new NotFoundError('EventVersion', versionId)
+
+  const snap = version.snapshot as Record<string, unknown>
+
+  // 保存当前版本到历史（在还原之前快照当前状态）
+  const current = await getEventById(cpId, eventId)
+  await db.insert(eventVersions).values({
+    eventId,
+    snapshot: current as Record<string, unknown>,
+    editedBy: restoredBy ?? null,
+  })
+
+  // 还原
+  const [restored] = await db
+    .update(events)
+    .set({
+      title:         snap['title']         as string,
+      summary:       (snap['summary']      as string | null) ?? null,
+      content:       (snap['content']      as Record<string, unknown>) ?? {},
+      eventDate:     (snap['eventDate']    as string | null) ?? null,
+      datePrecision: (snap['datePrecision'] as 'year' | 'month' | 'day') ?? 'day',
+      importance:    (snap['importance']   as 'critical' | 'high' | 'medium' | 'normal' | 'low') ?? 'normal',
+      isMilestone:   Boolean(snap['isMilestone']),
+      sourceRef:     (snap['sourceRef']    as string | null) ?? null,
+      emotionIcon:   (snap['emotionIcon']  as string | null) ?? null,
+      updatedAt:     new Date(),
+    })
+    .where(eq(events.id, eventId))
+    .returning()
+
+  return restored
+}
+
+// ── 批量操作 ──────────────────────────────────────────────
+
+export interface BatchUpdateInput {
+  ids:        string[]
+  importance?: 'critical' | 'high' | 'medium' | 'normal' | 'low'
+  addTagIds?:  string[]
+  removeTagIds?: string[]
+}
+
+/** 批量更新重要性 / 添加或移除标签 */
+export async function batchUpdateEvents(cpId: string, input: BatchUpdateInput) {
+  const db = getDb()
+  if (input.ids.length === 0) return { updated: 0 }
+
+  // 验证所有 id 属于该 CP
+  const existing = await db
+    .select({ id: events.id })
+    .from(events)
+    .where(and(eq(events.cpId, cpId), inArray(events.id, input.ids)))
+  const validIds = existing.map(e => e.id)
+  if (validIds.length === 0) return { updated: 0 }
+
+  if (input.importance) {
+    await db
+      .update(events)
+      .set({ importance: input.importance, updatedAt: new Date() })
+      .where(inArray(events.id, validIds))
+  }
+
+  if (input.removeTagIds?.length) {
+    await db.delete(eventTags).where(
+      and(
+        inArray(eventTags.eventId, validIds),
+        inArray(eventTags.tagId, input.removeTagIds),
+      ),
+    )
+  }
+
+  if (input.addTagIds?.length) {
+    const pairs = validIds.flatMap(eid =>
+      input.addTagIds!.map(tid => ({ eventId: eid, tagId: tid })),
+    )
+    await db.insert(eventTags).values(pairs).onConflictDoNothing()
+  }
+
+  return { updated: validIds.length }
+}
+
+/** 批量删除事件 */
+export async function batchDeleteEvents(cpId: string, ids: string[]) {
+  const db = getDb()
+  if (ids.length === 0) return { deleted: 0 }
+
+  const existing = await db
+    .select({ id: events.id })
+    .from(events)
+    .where(and(eq(events.cpId, cpId), inArray(events.id, ids)))
+  const validIds = existing.map(e => e.id)
+  if (validIds.length === 0) return { deleted: 0 }
+
+  await db.delete(events).where(inArray(events.id, validIds))
+  return { deleted: validIds.length }
 }
