@@ -10,6 +10,7 @@ import {
   updateMyProfileSchema,
   updateUserRoleSchema,
   generateInviteSchema,
+  updateCpAdminQuotaSchema,
   listUsersSchema,
 } from './user.schema.js'
 import { permissionMiddleware } from '../../middlewares/permission.middleware.js'
@@ -36,12 +37,18 @@ export function buildUserRouter() {
     return c.json(success(await userService.listUsers(query)))
   })
 
-  // ── 修改角色（admin+）───────────────────────────────────
+  // ── 修改全站角色（admin+）────────────────────────────────
   router.patch('/:id/role', permissionMiddleware('member:manage'), zValidator('json', updateUserRoleSchema), async (c) => {
     const { userId, role } = c.get('user')
-    const targetId = c.req.param('id')
+    const targetId = c.req.param('id')!
     const data = c.req.valid('json')
     return c.json(success(await userService.updateUserRole(targetId, data, userId, role)))
+  })
+
+  // ── 调整 cp_admin 邀请码配额（admin+）───────────────────
+  router.patch('/:id/quota', permissionMiddleware('member:manage'), zValidator('json', updateCpAdminQuotaSchema), async (c) => {
+    const data = c.req.valid('json')
+    return c.json(success(await userService.updateCpAdminQuota(data)))
   })
 
   // ── 停用账号（admin+）───────────────────────────────────
@@ -52,8 +59,8 @@ export function buildUserRouter() {
     return c.json(success(null))
   })
 
-  // ── 邀请码管理（admin+）─────────────────────────────────
-  router.post('/invite', permissionMiddleware('member:manage'), zValidator('json', generateInviteSchema), async (c) => {
+  // ── 邀请码管理（admin+，全站邀请码）─────────────────────
+  router.post('/invite', permissionMiddleware('invite:unlimited'), zValidator('json', generateInviteSchema), async (c) => {
     const { userId } = c.get('user')
     const data = c.req.valid('json')
     const invite = await userService.generateInviteCode(data, userId)
@@ -65,7 +72,7 @@ export function buildUserRouter() {
     return c.json(success(invites))
   })
 
-  router.delete('/invitations/:code', permissionMiddleware('member:manage'), async (c) => {
+  router.delete('/invitations/:code', permissionMiddleware('invite:unlimited'), async (c) => {
     const { userId, role } = c.get('user')
     const code = c.req.param('code')!
     await userService.revokeInvitation(code, userId, role)

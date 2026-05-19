@@ -13,7 +13,7 @@
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-lg font-semibold text-[var(--color-text-title)]">{{ tab.name }}</h2>
         <button
-          v-if="can('cp:update')"
+          v-if="canInCp(props.cpId, 'custom_tab:manage')"
           class="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors border border-[var(--color-border)] px-2.5 py-1 rounded-[var(--radius-btn)]"
           @click="showEditor = true"
         >⚙ 编辑</button>
@@ -126,7 +126,7 @@ import type { CpItem } from '@/types'
 const props = defineProps<{ cp?: CpItem | null; cpId: string }>()
 
 const route   = useRoute()
-const { can } = usePermission()
+const { canInCp } = usePermission()
 const toast   = useToast()
 
 const tab      = ref<CpTab | null>(null)

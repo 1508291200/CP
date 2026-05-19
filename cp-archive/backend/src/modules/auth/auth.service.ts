@@ -1,6 +1,6 @@
 import { eq, and, isNull } from 'drizzle-orm'
 import { getDb } from '../../db/connection.js'
-import { users, invitations } from '../../db/schema/index.js'
+import { users, invitations, cpMembers, cps, cpAdminQuota } from '../../db/schema/index.js'
 import { UnauthorizedError, NotFoundError, ConflictError, ValidationError } from '../../shared/errors.js'
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../../utils/jwt.js'
 import { hashPassword, verifyPassword } from '../../utils/hash.js'
@@ -16,6 +16,21 @@ function refreshKey(userId: string) {
 function buildUserPublic(user: typeof users.$inferSelect) {
   const { passwordHash: _, ...publicUser } = user
   return publicUser
+}
+
+/** 查询用户的 CP 成员关系（用于 me 接口返回） */
+async function getCpMemberships(userId: string) {
+  const db = getDb()
+  const rows = await db
+    .select({
+      cpId:   cpMembers.cpId,
+      cpName: cps.name,
+      cpRole: cpMembers.cpRole,
+    })
+    .from(cpMembers)
+    .innerJoin(cps, eq(cpMembers.cpId, cps.id))
+    .where(eq(cpMembers.userId, userId))
+  return rows
 }
 
 export async function login(data: LoginInput) {
@@ -36,7 +51,9 @@ export async function login(data: LoginInput) {
   const redis = await getRedis()
   await redis.setEx(refreshKey(user.id), REFRESH_TOKEN_TTL, refreshToken)
 
-  return { accessToken, refreshToken, user: buildUserPublic(user) }
+  const cpMemberships = await getCpMemberships(user.id)
+
+  return { accessToken, refreshToken, user: { ...buildUserPublic(user), cpMemberships } }
 }
 
 export async function refresh(cookieRefreshToken: string) {
@@ -70,21 +87,17 @@ export async function logout(userId: string) {
 export async function register(data: RegisterInput) {
   const db = getDb()
 
-  // 验证邀请码
+  // ── 验证邀请码 ───────────────────────────────────────────────────────
   const [invite] = await db
     .select()
     .from(invitations)
-    .where(
-      and(
-        eq(invitations.code, data.inviteCode),
-        isNull(invitations.usedBy),
-      ),
-    )
+    .where(eq(invitations.code, data.inviteCode))
 
   if (!invite) throw new ValidationError('邀请码无效或已使用')
+  if (invite.useCount >= invite.maxUses) throw new ValidationError('邀请码已使用完毕')
   if (invite.expiresAt && invite.expiresAt < new Date()) throw new ValidationError('邀请码已过期')
 
-  // 检查用户名/邮箱唯一性
+  // ── 检查用户名/邮箱唯一性 ────────────────────────────────────────────
   const [existUser] = await db
     .select({ id: users.id })
     .from(users)
@@ -99,18 +112,51 @@ export async function register(data: RegisterInput) {
 
   const passwordHash = await hashPassword(data.password)
 
+  // ── 确定注册用户的全站角色 ───────────────────────────────────────────
+  // CP 绑定邀请码（cp_admin 生成）→ 强制 editor 角色
+  // 全站邀请码（owner/admin 生成）→ 使用邀请码中指定的角色
+  const userRole = invite.cpId ? 'editor' : invite.role
+
   const [user] = await db
     .insert(users)
     .values({
       username:     data.username,
       email:        data.email,
       passwordHash,
-      role:         invite.role,
+      role:         userRole,
     })
     .returning()
 
-  // 标记邀请码已使用
-  await db.update(invitations).set({ usedBy: user.id }).where(eq(invitations.code, data.inviteCode))
+  // ── 更新邀请码使用计数 ───────────────────────────────────────────────
+  await db.update(invitations)
+    .set({
+      useCount: invite.useCount + 1,
+      usedBy:   invite.maxUses === 1 ? user.id : invite.usedBy, // maxUses=1 时记录使用者
+    })
+    .where(eq(invitations.code, data.inviteCode))
+
+  // ── CP 绑定邀请码：自动加入 cp_members ──────────────────────────────
+  if (invite.cpId) {
+    await db.insert(cpMembers).values({
+      cpId:      invite.cpId,
+      userId:    user.id,
+      cpRole:    'editor',
+      grantedBy: invite.createdBy ?? undefined,
+    })
+
+    // 扣减 cp_admin 配额（用 SQL 表达式避免并发问题）
+    if (invite.createdBy) {
+      const { sql } = await import('drizzle-orm')
+      await db.update(cpAdminQuota)
+        .set({ inviteUsed: sql`invite_used + 1` })
+        .where(
+          and(
+            eq(cpAdminQuota.userId, invite.createdBy),
+            eq(cpAdminQuota.cpId, invite.cpId),
+          ),
+        )
+    }
+  }
 
   return buildUserPublic(user)
 }
@@ -119,5 +165,7 @@ export async function getMe(userId: string) {
   const db = getDb()
   const [user] = await db.select().from(users).where(eq(users.id, userId))
   if (!user) throw new NotFoundError('User', userId)
-  return buildUserPublic(user)
+
+  const cpMemberships = await getCpMemberships(userId)
+  return { ...buildUserPublic(user), cpMemberships }
 }

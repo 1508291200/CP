@@ -32,26 +32,26 @@
     <!-- 操作按钮 -->
     <div class="flex items-center gap-3 pt-2 border-t border-[var(--color-border)]">
       <button
-        v-if="can('event:create')"
+        v-if="canInCp(cpId, 'event:create')"
         class="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
         @click="$emit('edit')"
       >编辑</button>
 
       <button
-        v-if="can('event:create')"
+        v-if="canInCp(cpId, 'event:create')"
         class="text-xs transition-colors"
         :class="event.isMilestone ? 'text-[var(--color-high)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-high)]'"
         @click="$emit('milestone-toggled', !event.isMilestone)"
       >{{ event.isMilestone ? '★ 取消里程碑' : '☆ 标记里程碑' }}</button>
 
       <button
-        v-if="can('history:view:others')"
+        v-if="canInCp(cpId, 'history:view:others')"
         class="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
         @click="$emit('show-history')"
       >🕐 历史</button>
 
       <button
-        v-if="can('event:delete:own')"
+        v-if="canInCp(cpId, 'event:delete:own')"
         class="text-xs text-[var(--color-text-disabled)] hover:text-[var(--color-danger)] transition-colors ml-auto"
         @click="handleDelete"
       >删除</button>
@@ -82,7 +82,7 @@ const emit = defineEmits<{
   'show-history':     []
 }>()
 
-const { can } = usePermission()
+const { canInCp } = usePermission()
 const { deleteEvent } = useEvent(props.cpId)
 
 const displayDate = computed(() => {

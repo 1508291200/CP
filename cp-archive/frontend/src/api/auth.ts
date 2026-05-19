@@ -16,17 +16,25 @@ export interface RegisterInput {
   inviteCode: string
 }
 
+/** CP 级成员关系（来自 /auth/me 响应） */
+export interface CpMembership {
+  cpId:   string
+  cpName: string
+  cpRole: 'cp_admin' | 'editor'
+}
+
 export interface AuthUser {
-  id: string
-  username: string
-  displayName: string | null
-  role: 'owner' | 'admin' | 'editor' | 'contributor' | 'viewer'
-  avatarUrl: string | null
+  id:            string
+  username:      string
+  displayName:   string | null
+  role:          'owner' | 'admin' | 'cp_admin' | 'editor' | 'viewer'
+  avatarUrl:     string | null
+  cpMemberships: CpMembership[]
 }
 
 export interface LoginResult {
   accessToken: string
-  user: AuthUser
+  user:        AuthUser
 }
 
 export const authApi = {
@@ -34,6 +42,7 @@ export const authApi = {
   refresh:  () => api.post<{ accessToken: string }>('/auth/refresh'),
   logout:   () => api.post<void>('/auth/logout'),
   register: (data: RegisterInput) => api.post<AuthUser>('/auth/register', data),
+  me:       () => api.get<AuthUser>('/auth/me'),
 }
 
 // 具名导出供 RegisterView 直接使用

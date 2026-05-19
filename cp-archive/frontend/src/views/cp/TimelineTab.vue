@@ -34,7 +34,7 @@
 
       <!-- 批量模式切换 -->
       <button
-        v-if="can('event:edit:own')"
+        v-if="canInCp(cpId, 'event:edit:own')"
         class="text-xs border px-2.5 py-1 rounded-[var(--radius-btn)] transition-colors"
         :class="batchMode
           ? 'border-[var(--color-primary)] bg-[var(--color-primary-bg)] text-[var(--color-primary)]'
@@ -44,10 +44,10 @@
 
       <!-- 新增按钮 -->
       <div class="flex gap-2 ml-auto">
-        <Button v-if="can('event:create')" size="sm" variant="ghost" @click="showQuickInput = !showQuickInput">
+        <Button v-if="canInCp(cpId, 'event:create')" size="sm" variant="ghost" @click="showQuickInput = !showQuickInput">
           ⚡ 快速录入
         </Button>
-        <Button v-if="can('event:create')" size="sm" @click="openCreateModal">
+        <Button v-if="canInCp(cpId, 'event:create')" size="sm" @click="openCreateModal">
           + 新增事件
         </Button>
       </div>
@@ -96,7 +96,7 @@
     <!-- 快速录入条 -->
     <Transition name="slide-down">
       <QuickInput
-        v-if="showQuickInput && can('event:create')"
+        v-if="showQuickInput && canInCp(cpId, 'event:create')"
         :cp-id="cpId"
         class="mb-4"
         @saved="onQuickSaved"
@@ -115,7 +115,7 @@
       v-else
       :events="events"
       :cp-id="cpId"
-      :can-create="can('event:create')"
+      :can-create="canInCp(cpId, 'event:create')"
       :batch-mode="batchMode"
       :selected-ids="selectedIds"
       @add-event="openCreateModal"
@@ -167,7 +167,7 @@ const props = defineProps<{ cp?: CpItem | null; cpId: string }>()
 const route      = useRoute()
 const eventStore = useEventStore()
 const { toggleMilestone } = useEvent(props.cpId)
-const { can }    = usePermission()
+const { canInCp } = usePermission()
 const toast      = useToast()
 
 const showQuickInput = ref(false)

@@ -8,6 +8,20 @@
       "when": 1778812266892,
       "tag": "0000_wealthy_the_initiative",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779190600000,
+      "tag": "0001_add_cp_admin_enum",
+      "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779190700000,
+      "tag": "0002_cp_permission_system",
+      "breakpoints": true
     }
   ]
 }

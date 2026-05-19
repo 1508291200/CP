@@ -50,7 +50,7 @@
                 </div>
 
                 <button
-                  v-if="can('history:restore')"
+                  v-if="canInCp(cpId, 'history:restore')"
                   class="flex-shrink-0 text-xs text-[var(--color-primary)] hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
                   :disabled="restoring === v.id"
                   @click="handleRestore(v)"
@@ -81,7 +81,7 @@ const emit = defineEmits<{
   restored: []
 }>()
 
-const { can }   = usePermission()
+const { canInCp } = usePermission()
 const toast     = useToast()
 const versions  = ref<EventVersion[]>([])
 const loading   = ref(false)

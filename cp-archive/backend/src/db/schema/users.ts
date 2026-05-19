@@ -1,5 +1,11 @@
 /**
  * users 表 + invitations 表
+ *
+ * 角色体系（v2）：
+ *   owner > admin > cp_admin > editor > viewer
+ *
+ * cp_admin / editor 的 CP 级别权限通过 cp_members 表管理，
+ * users.role 只表示全站基础角色。
  */
 
 import {
@@ -10,13 +16,14 @@ import {
   pgEnum,
   jsonb,
   boolean,
+  integer,
 } from 'drizzle-orm/pg-core'
 
 export const userRoleEnum = pgEnum('user_role', [
   'owner',
   'admin',
+  'cp_admin',
   'editor',
-  'contributor',
   'viewer',
 ])
 
@@ -38,13 +45,19 @@ export const users = pgTable('users', {
 export const invitations = pgTable('invitations', {
   id:        uuid('id').primaryKey().defaultRandom(),
   code:      varchar('code', { length: 64 }).unique().notNull(),
-  role:      userRoleEnum('role').notNull().default('contributor'),
+  role:      userRoleEnum('role').notNull().default('editor'),
+  // NULL = 全站邀请（owner/admin 生成）；非 NULL = 绑定特定 CP（cp_admin 生成）
+  cpId:      uuid('cp_id'),
   createdBy: uuid('created_by').references(() => users.id),
-  usedBy:    uuid('used_by').references(() => users.id),
+  usedBy:    uuid('used_by').references(() => users.id),  // max_uses=1 时记录首位使用者
+  // 多次使用支持（cp_admin 可生成 max_uses=1 的一次性码）
+  maxUses:   integer('max_uses').notNull().default(1),
+  useCount:  integer('use_count').notNull().default(0),
   expiresAt: timestamp('expires_at', { withTimezone: true }),
+  label:     varchar('label', { length: 100 }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
-export type User = typeof users.$inferSelect
+export type User    = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export type UserRole = (typeof userRoleEnum.enumValues)[number]
