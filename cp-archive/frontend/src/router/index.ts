@@ -15,6 +15,8 @@ const ThemeSettings     = () => import('@/views/settings/ThemeSettings.vue')
 const ProfileSettings   = () => import('@/views/settings/ProfileSettings.vue')
 const MembersSettings   = () => import('@/views/settings/MembersSettings.vue')
 const DataSettings      = () => import('@/views/settings/DataSettings.vue')
+const NotificationSettings = () => import('@/views/settings/NotificationSettings.vue')
+const NotificationView  = () => import('@/views/NotificationView.vue')
 
 const router = createRouter({
   history: createWebHistory(),
@@ -64,7 +66,14 @@ const router = createRouter({
           name: 'cp-custom-tab',
           component: CustomTab,
         },
-      ],
+        // 通知中心
+    {
+      path: '/notifications',
+      name: 'notifications',
+      component: NotificationView,
+      meta: { requiresAuth: true },
+    },
+  ],
     },
     // ── 设置页 ────────────────────────────────────────────────
     {
@@ -77,6 +86,7 @@ const router = createRouter({
         { path: 'profile', name: 'settings-profile',  component: ProfileSettings },
         { path: 'members', name: 'settings-members',  component: MembersSettings },
         { path: 'data',    name: 'settings-data',     component: DataSettings },
+        { path: 'notifications', name: 'settings-notifications', component: NotificationSettings },
       ],
     },
   ],

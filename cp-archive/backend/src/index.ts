@@ -28,6 +28,8 @@ import { buildSettingsRouter } from './modules/settings/settings.routes.js'
 import { buildUserRouter } from './modules/user/user.routes.js'
 import { buildDataRouter } from './modules/data/data.routes.js'
 import { startImageWorker } from './jobs/queue.js'
+import { buildNotificationRouter } from './modules/notification/notification.routes.js'
+import { initNotificationListener } from './modules/notification/notification.service.js'
 
 const config = getConfig()
 const app = new Hono()
@@ -74,6 +76,10 @@ api.route('/users', buildUserRouter())
 api.use('/data/*', authMiddleware)
 api.route('/data', buildDataRouter())
 
+// 通知系统（全部需要登录）
+api.use('/notifications/*', authMiddleware)
+api.route('/notifications', buildNotificationRouter())
+
 app.route('/api/v1', api)
 
 // ── 404 ────────────────────────────────────────────────
@@ -108,6 +114,8 @@ serve({ fetch: app.fetch, port: config.PORT }, (info) => {
   console.log(`\x1b[36m[Server]\x1b[0m Version: ${config.VERSION}`)
   // 启动图片处理 Worker
   startImageWorker()
+  // 初始化通知监听器（进程内事件总线）
+  initNotificationListener()
 })
 
 export default app

@@ -9,6 +9,7 @@ import {
 import { NotFoundError } from '../../shared/errors.js'
 import { paginationMeta } from '../../shared/response.js'
 import { MAX_EVENT_VERSIONS } from '../../shared/constants.js'
+import { emitNotification } from '../../shared/notification.emitter.js'
 import type { CreateEventInput, UpdateEventInput, EventQuery } from './event.schema.js'
 
 export async function listEvents(cpId: string, query: EventQuery) {
@@ -72,6 +73,17 @@ export async function createEvent(cpId: string, data: CreateEventInput, createdB
     })
   }
 
+  // 发布通知事件（fire-and-forget）
+  emitNotification({
+    type:       'event:created',
+    cpId,
+    actorId:    createdBy,
+    entityId:   event.id,
+    entityType: 'event',
+    title:      `新事件：${event.title}`,
+    body:       event.summary ?? undefined,
+  })
+
   return event
 }
 
@@ -122,13 +134,32 @@ export async function updateEvent(
     }
   }
 
+  // 发布通知事件
+  emitNotification({
+    type:       'event:updated',
+    cpId,
+    actorId:    editedBy,
+    entityId:   id,
+    entityType: 'event',
+    title:      `事件已更新：${updated.title}`,
+  })
+
   return updated
 }
 
 export async function deleteEvent(cpId: string, id: string) {
   const db = getDb()
-  await getEventById(cpId, id)
+  const event = await getEventById(cpId, id)
   await db.delete(events).where(eq(events.id, id))
+
+  // 发布通知事件
+  emitNotification({
+    type:       'event:deleted',
+    cpId,
+    entityId:   id,
+    entityType: 'event',
+    title:      `事件已删除：${event.title}`,
+  })
 }
 
 export async function toggleMilestone(cpId: string, id: string, mark: boolean) {
@@ -147,6 +178,16 @@ export async function toggleMilestone(cpId: string, id: string, mark: boolean) {
       title:         event.title,
       description:   event.summary ?? null,
       milestoneDate: event.eventDate ?? null,
+    })
+
+    // 标记里程碑时发送通知
+    emitNotification({
+      type:       'event:milestone',
+      cpId,
+      entityId:   id,
+      entityType: 'event',
+      title:      `里程碑：${event.title}`,
+      body:       '该事件已被标记为里程碑',
     })
   } else {
     await db.delete(milestones).where(eq(milestones.eventId, id))

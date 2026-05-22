@@ -18,6 +18,7 @@ import type { UserRole } from '../../db/schema/users.js'
 import type { CpMemberRole } from '../../db/schema/cp_members.js'
 import { ForbiddenError, NotFoundError, ConflictError, ValidationError } from '../../shared/errors.js'
 import { logOperation } from '../user/user.log.js'
+import { emitNotification } from '../../shared/notification.emitter.js'
 
 // 角色权重（cp_admin > editor）
 const CP_ROLE_WEIGHT: Record<CpMemberRole, number> = {
@@ -83,6 +84,18 @@ export async function addCpMember(
   }).returning()
 
   await logOperation(grantedBy, 'cp_member:add', 'cp_member', member.id, { cpId, cpRole })
+
+  // 发布新成员加入通知
+  emitNotification({
+    type:       'member:joined',
+    cpId,
+    actorId:    grantedBy,
+    entityId:   userId,
+    entityType: 'user',
+    title:      '新成员加入',
+    body:       `有新成员以 ${cpRole} 身份加入了 CP`,
+  })
+
   return member
 }
 
@@ -126,6 +139,18 @@ export async function updateCpMemberRole(
   await logOperation(operatorId, 'cp_member:role_change', 'cp_member', member.id, {
     cpId, oldRole: member.cpRole, newRole,
   })
+
+  // 发布权限变更通知（接收者为被改角色的用户）
+  emitNotification({
+    type:       'member:role_changed',
+    cpId,
+    actorId:    operatorId,
+    entityId:   userId,
+    entityType: 'user',
+    title:      '您的 CP 权限已变更',
+    body:       `您的角色已被修改为 ${newRole}`,
+  })
+
   return updated
 }
 
@@ -157,4 +182,15 @@ export async function removeCpMember(
 
   await db.delete(cpMembers).where(and(eq(cpMembers.cpId, cpId), eq(cpMembers.userId, userId)))
   await logOperation(operatorId, 'cp_member:remove', 'cp_member', member.id, { cpId, userId })
+
+  // 发布成员被移除通知（接收者为被移除的用户）
+  emitNotification({
+    type:       'member:removed',
+    cpId,
+    actorId:    operatorId,
+    entityId:   userId,
+    entityType: 'user',
+    title:      '您已被移出 CP',
+    body:       `您已被移出该 CP，如有疑问请联系管理员`,
+  })
 }

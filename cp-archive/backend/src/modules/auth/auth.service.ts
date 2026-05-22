@@ -5,6 +5,7 @@ import { UnauthorizedError, NotFoundError, ConflictError, ValidationError } from
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../../utils/jwt.js'
 import { hashPassword, verifyPassword } from '../../utils/hash.js'
 import { getRedis } from '../../utils/redis.js'
+import { emitNotification } from '../../shared/notification.emitter.js'
 import type { LoginInput, RegisterInput } from './auth.schema.js'
 
 const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 // 7 天（秒）
@@ -156,6 +157,17 @@ export async function register(data: RegisterInput) {
           ),
         )
     }
+
+    // 发布邀请加入通知
+    emitNotification({
+      type:       'member:joined',
+      cpId:       invite.cpId,
+      actorId:    user.id,       // 新成员自身触发（邀请人不排除，他们会收到通知）
+      entityId:   user.id,
+      entityType: 'user',
+      title:      `新成员通过邀请码加入`,
+      body:       `${user.username} 已加入`,
+    })
   }
 
   return buildUserPublic(user)

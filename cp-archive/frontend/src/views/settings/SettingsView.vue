@@ -48,10 +48,11 @@ const route  = useRoute()
 const { can } = usePermission()
 
 const menuItems = [
-  { label: '主题与外观', to: '/settings/theme',   icon: '🎨' },
-  { label: '个人资料',   to: '/settings/profile',  icon: '👤' },
-  { label: '成员管理',   to: '/settings/members',  icon: '👥', requireRole: 'member:manage' },
-  { label: '数据管理',   to: '/settings/data',     icon: '💾', requireRole: 'data:export' },
+  { label: '主题与外观', to: '/settings/theme',         icon: '🎨' },
+  { label: '个人资料',   to: '/settings/profile',        icon: '👤' },
+  { label: '通知偏好',   to: '/settings/notifications',  icon: '🔔' },
+  { label: '成员管理',   to: '/settings/members',        icon: '👥', requireRole: 'member:manage' },
+  { label: '数据管理',   to: '/settings/data',           icon: '💾', requireRole: 'data:export' },
 ]
 
 function isActiveMenu(to: string) {

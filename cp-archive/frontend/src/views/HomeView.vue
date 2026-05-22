@@ -17,6 +17,8 @@
             @click="router.push('/settings/theme')"
             title="主题设置"
           >🎨</button>
+          <!-- 通知铃铛 -->
+          <NotificationBell />
           <div class="flex items-center gap-2">
             <div class="w-7 h-7 rounded-full bg-[var(--color-primary-bg)] flex items-center justify-center text-xs font-medium text-[var(--color-primary)]">
               {{ authStore.user?.displayName?.[0] ?? authStore.user?.username?.[0]?.toUpperCase() }}
@@ -104,6 +106,7 @@ import { usePermission } from '@/composables/usePermission'
 import Button from '@/components/base/Button.vue'
 import CpCard from '@/components/cp/CpCard.vue'
 import CreateCpModal from '@/components/cp/CreateCpModal.vue'
+import NotificationBell from '@/components/layout/NotificationBell.vue'
 
 const router = useRouter()
 const cpStore = useCpStore()

@@ -7,6 +7,7 @@ import { getDb } from '../../db/connection.js'
 import { cps, cpTags } from '../../db/schema/index.js'
 import { NotFoundError } from '../../shared/errors.js'
 import { paginationMeta } from '../../shared/response.js'
+import { emitNotification } from '../../shared/notification.emitter.js'
 import type { CreateCpInput, UpdateCpInput, CpQuery } from './cp.schema.js'
 
 export async function listCps(query: CpQuery) {
@@ -86,6 +87,15 @@ export async function updateCp(id: string, data: UpdateCpInput) {
       await db.insert(cpTags).values(tagIds.map((tagId) => ({ cpId: id, tagId })))
     }
   }
+
+  // 发布 CP 更新通知
+  emitNotification({
+    type:       'cp:updated',
+    cpId:       id,
+    entityId:   id,
+    entityType: 'cp',
+    title:      `CP 信息已更新：${updated.name}`,
+  })
 
   return updated
 }

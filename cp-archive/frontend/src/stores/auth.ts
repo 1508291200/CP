@@ -10,6 +10,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { authApi, type AuthUser, type CpMembership } from '@/api/auth'
 import { setAccessToken } from '@/api/client'
+import { useNotificationStore } from '@/stores/notification'
 
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter()
@@ -43,6 +44,8 @@ export const useAuthStore = defineStore('auth', () => {
     const res = await authApi.login({ username, password })
     setAccessToken(res.data.accessToken)
     setUser(res.data.user)
+    // 登录后启动通知轮询
+    useNotificationStore().startPolling()
   }
 
   async function logout() {
@@ -51,6 +54,8 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       setAccessToken(null)
       setUser(null)
+      // 停止通知轮询并清空状态
+      useNotificationStore().stopPolling()
       router.push('/login')
     }
   }
@@ -71,8 +76,15 @@ export const useAuthStore = defineStore('auth', () => {
   // 监听来自 api/client.ts 的自动登出事件
   window.addEventListener('auth:logout', () => {
     setUser(null)
+    useNotificationStore().stopPolling()
     router.push('/login')
   })
+
+  // 页面刷新后如果已登录（本地有用户信息），恢复轮询
+  if (user.value) {
+    // 使用 setTimeout 确保 Pinia 全部初始化完成后再启动
+    setTimeout(() => useNotificationStore().startPolling(), 0)
+  }
 
   return {
     user,
