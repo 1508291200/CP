@@ -25,6 +25,7 @@
           :cp-id="cpId"
           :batch-mode="batchMode"
           :selected-ids="selectedIds"
+          :highlight-event-id="highlightEventId"
           @edit="$emit('edit', $event)"
           @deleted="$emit('deleted', $event)"
           @milestone-toggled="(id: string, val: boolean) => $emit('milestone-toggled', id, val)"
@@ -48,6 +49,7 @@ const props = defineProps<{
   canCreate?: boolean
   batchMode?: boolean
   selectedIds?: Set<string>
+  highlightEventId?: string
 }>()
 
 defineEmits<{

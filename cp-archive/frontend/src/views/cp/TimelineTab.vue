@@ -118,6 +118,7 @@
       :can-create="canInCp(cpId, 'event:create')"
       :batch-mode="batchMode"
       :selected-ids="selectedIds"
+      :highlight-event-id="highlightEventId"
       @add-event="openCreateModal"
       @edit="openEditModal"
       @deleted="onDeleted"

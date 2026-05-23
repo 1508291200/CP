@@ -12,6 +12,7 @@
         :cp-id="cpId"
         :batch-mode="batchMode"
         :selected="selectedIds?.has(event.id)"
+        :highlighted="event.id === highlightEventId"
         @edit="$emit('edit', $event)"
         @deleted="$emit('deleted', $event)"
         @milestone-toggled="(id: string, val: boolean) => $emit('milestone-toggled', id, val)"
@@ -32,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { EventItem, Importance } from '@/types'
 import EventRow from './EventRow.vue'
 
@@ -42,6 +43,7 @@ const props = defineProps<{
   collapseThreshold?: number
   batchMode?: boolean
   selectedIds?: Set<string>
+  highlightEventId?: string
 }>()
 
 defineEmits<{
@@ -54,6 +56,15 @@ defineEmits<{
 
 const threshold = computed(() => props.collapseThreshold ?? 4)
 const showAll   = ref(false)
+
+// 当高亮事件在折叠区域时，自动展开
+watch(() => props.highlightEventId, (id) => {
+  if (!id) return
+  const idx = props.events.findIndex(e => e.id === id)
+  if (idx >= threshold.value) {
+    showAll.value = true
+  }
+})
 
 const visibleEvents = computed(() =>
   showAll.value ? props.events : props.events.slice(0, threshold.value)
