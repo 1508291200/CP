@@ -16,6 +16,7 @@ const ProfileSettings   = () => import('@/views/settings/ProfileSettings.vue')
 const MembersSettings   = () => import('@/views/settings/MembersSettings.vue')
 const DataSettings      = () => import('@/views/settings/DataSettings.vue')
 const NotificationSettings = () => import('@/views/settings/NotificationSettings.vue')
+const LogsView             = () => import('@/views/settings/LogsView.vue')
 const NotificationView  = () => import('@/views/NotificationView.vue')
 
 const router = createRouter({
@@ -87,6 +88,7 @@ const router = createRouter({
         { path: 'members', name: 'settings-members',  component: MembersSettings },
         { path: 'data',    name: 'settings-data',     component: DataSettings },
         { path: 'notifications', name: 'settings-notifications', component: NotificationSettings },
+        { path: 'logs',          name: 'settings-logs',          component: LogsView },
       ],
     },
   ],

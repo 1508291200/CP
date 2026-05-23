@@ -52,5 +52,23 @@ export const listInvitations = () =>
 export const revokeInvitation = (code: string) =>
   api.delete(`/users/invitations/${code}`)
 
-export const listLogs = (params?: { page?: number; limit?: number }) =>
-  api.get('/users/logs', { params })
+export interface OperationLog {
+  id:           string
+  action:       string
+  resourceType: string | null
+  resourceId:   string | null
+  detail:       Record<string, unknown> | null
+  ip:           string | null
+  createdAt:    string
+  userId:       string | null
+  username:     string | null
+  displayName:  string | null
+}
+
+export interface LogListResult {
+  items: OperationLog[]
+  meta: { total: number; page: number; limit: number; totalPages: number }
+}
+
+export const listLogs = (params?: { page?: number; limit?: number; action?: string; resourceType?: string }) =>
+  api.get<LogListResult>('/users/logs', params as Record<string, unknown>)

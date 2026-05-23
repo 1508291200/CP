@@ -273,15 +273,43 @@ export async function revokeInvitation(code: string, operatorId: string, operato
 }
 
 // ── 操作日志查询 ─────────────────────────────────────────────────
-export async function listLogs(query: { page?: number; limit?: number }) {
-  const { page = 1, limit = 50 } = query
+export async function listLogs(query: { page?: number; limit?: number; action?: string; resourceType?: string }) {
+  const { page = 1, limit = 50, action, resourceType } = query
   const { operationLogs } = await import('../../db/schema/index.js')
+  const { users: usersTable } = await import('../../db/schema/index.js')
   const db = getDb()
+
+  const conditions = []
+  if (action)       conditions.push(ilike(operationLogs.action, `%${action}%`))
+  if (resourceType) conditions.push(eq(operationLogs.resourceType, resourceType))
+
   const rows = await db
-    .select()
+    .select({
+      id:           operationLogs.id,
+      action:       operationLogs.action,
+      resourceType: operationLogs.resourceType,
+      resourceId:   operationLogs.resourceId,
+      detail:       operationLogs.detail,
+      ip:           operationLogs.ip,
+      createdAt:    operationLogs.createdAt,
+      userId:       operationLogs.userId,
+      username:     usersTable.username,
+      displayName:  usersTable.displayName,
+    })
     .from(operationLogs)
-    .orderBy(operationLogs.createdAt)
+    .leftJoin(usersTable, eq(operationLogs.userId, usersTable.id))
+    .where(conditions.length ? and(...conditions) : undefined)
+    .orderBy(sql`${operationLogs.createdAt} desc`)
     .limit(limit)
     .offset((page - 1) * limit)
-  return rows
+
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(operationLogs)
+    .where(conditions.length ? and(...conditions) : undefined)
+
+  return {
+    items: rows,
+    meta:  { total: count, page, limit, totalPages: Math.ceil(count / limit) },
+  }
 }

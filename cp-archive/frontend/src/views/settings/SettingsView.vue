@@ -53,6 +53,7 @@ const menuItems = [
   { label: '通知偏好',   to: '/settings/notifications',  icon: '🔔' },
   { label: '成员管理',   to: '/settings/members',        icon: '👥', requireRole: 'member:manage' },
   { label: '数据管理',   to: '/settings/data',           icon: '💾', requireRole: 'data:export' },
+  { label: '操作日志',   to: '/settings/logs',           icon: '📋', requireRole: 'log:view' },
 ]
 
 function isActiveMenu(to: string) {

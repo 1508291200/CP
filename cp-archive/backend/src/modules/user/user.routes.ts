@@ -81,8 +81,10 @@ export function buildUserRouter() {
 
   // ── 操作日志（admin+）───────────────────────────────────
   router.get('/logs', permissionMiddleware('log:view'), zValidator('query', z.object({
-    page:  z.coerce.number().int().min(1).default(1),
-    limit: z.coerce.number().int().min(1).max(100).default(50),
+    page:         z.coerce.number().int().min(1).default(1),
+    limit:        z.coerce.number().int().min(1).max(100).default(50),
+    action:       z.string().optional(),
+    resourceType: z.string().optional(),
   })), async (c) => {
     const query = c.req.valid('query')
     return c.json(success(await userService.listLogs(query)))
