@@ -26,6 +26,14 @@
 
     <!-- Tab 内容区 -->
     <RouterView v-else :cp="cpStore.current" :cp-id="cpId" />
+
+    <!-- CP 编辑弹窗 -->
+    <CpEditModal
+      v-if="showEditModal && cpStore.current"
+      v-model:visible="showEditModal"
+      :cp="cpStore.current"
+      @saved="loadCp(cpId)"
+    />
   </div>
 </template>
 
@@ -38,6 +46,7 @@ import { useThemeStore } from '@/stores/theme'
 import { useUIStore } from '@/stores/ui'
 import DetailNav from '@/components/layout/DetailNav.vue'
 import CpBanner from '@/components/cp/CpBanner.vue'
+import CpEditModal from '@/components/cp/CpEditModal.vue'
 
 const route = useRoute()
 const cpStore = useCpStore()
