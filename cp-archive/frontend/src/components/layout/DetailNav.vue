@@ -41,6 +41,12 @@
 
       <!-- 右侧：操作按钮 -->
       <div class="flex items-center gap-2 flex-shrink-0">
+        <!-- 站内搜索（在当前 CP 范围内） -->
+        <button
+          class="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
+          title="搜索"
+          @click="router.push({ path: '/search', query: { cpId: cpId } })"
+        >🔍</button>
         <slot name="actions" />
       </div>
     </div>

@@ -30,6 +30,7 @@ import { buildDataRouter } from './modules/data/data.routes.js'
 import { startImageWorker } from './jobs/queue.js'
 import { buildNotificationRouter } from './modules/notification/notification.routes.js'
 import { initNotificationListener } from './modules/notification/notification.service.js'
+import { buildSearchRouter } from './modules/search/search.routes.js'
 
 const config = getConfig()
 const app = new Hono()
@@ -79,6 +80,10 @@ api.route('/data', buildDataRouter())
 // 通知系统（全部需要登录）
 api.use('/notifications/*', authMiddleware)
 api.route('/notifications', buildNotificationRouter())
+
+// 全局搜索（需登录）
+api.use('/search', authMiddleware)
+api.route('/search', buildSearchRouter())
 
 app.route('/api/v1', api)
 

@@ -17,6 +17,12 @@
             @click="router.push('/settings/theme')"
             title="主题设置"
           >🎨</button>
+          <!-- 全局搜索 -->
+          <button
+            class="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
+            title="全局搜索"
+            @click="router.push('/search')"
+          >🔍</button>
           <!-- 通知铃铛 -->
           <NotificationBell />
           <div class="flex items-center gap-2">
