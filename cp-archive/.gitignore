@@ -1,8 +1,10 @@
 node_modules/
 dist/
+# 所有 .env 变体（仅 .env.example 允许入库）
 .env
+.env.*
+!.env.example
 uploads/
 *.log
 .DS_Store
-*.txt
 backend/src/scripts/
