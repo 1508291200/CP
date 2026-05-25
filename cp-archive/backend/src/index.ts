@@ -111,21 +111,42 @@ app.notFound((c) =>
 
 // ── 全局错误处理（Hono 推荐方式）──────────────────────
 app.onError((err, c) => {
+  const isDev = config.NODE_ENV !== 'production'
+
+  // Zod 校验错误：返回具体字段错误
   if (err instanceof ZodError) {
     return c.json(
       { success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid parameters', details: err.flatten() } },
       400,
     )
   }
+
+  // 业务预期错误：直接返回预定义消息
   if (err instanceof AppError) {
     return c.json(
       { success: false, error: { code: err.code, message: err.message } },
-      err.statusCode as 400 | 401 | 403 | 404 | 409 | 500,
+      err.statusCode as 400 | 401 | 403 | 404 | 409 | 429 | 500,
     )
   }
-  console.error('[UnhandledError]', err)
+
+  // 未预期错误：结构化日志，生产环境返回通用消息（防内部信息泄露）
+  const logEntry = {
+    ts:      new Date().toISOString(),
+    path:    c.req.path,
+    method:  c.req.method,
+    message: err.message,
+    ...(isDev && { stack: err.stack }),
+  }
+  console.error('[UnhandledError]', JSON.stringify(logEntry))
+
   return c.json(
-    { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } },
+    {
+      success: false,
+      error: {
+        code:    'INTERNAL_ERROR',
+        message: isDev ? err.message : '服务器内部错误，请稍后重试',
+      },
+    },
     500,
   )
 })
