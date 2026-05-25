@@ -15,6 +15,8 @@ interface AppConfig {
   UPLOAD_DIR: string
   PUBLIC_URL: string
   VERSION: string
+  /** 逗号分隔的允许 CORS 来源（生产环境必须设置） */
+  ALLOWED_ORIGINS: string[]
 }
 
 function requireEnv(key: string): string {
@@ -51,6 +53,10 @@ export function loadConfig(): AppConfig {
     UPLOAD_DIR: optionalEnv('UPLOAD_DIR', './uploads'),
     PUBLIC_URL: optionalEnv('PUBLIC_URL', 'http://localhost:3000'),
     VERSION: optionalEnv('npm_package_version', '0.1.0'),
+    ALLOWED_ORIGINS: optionalEnv('ALLOWED_ORIGINS', '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean),
   }
 }
 

@@ -15,6 +15,7 @@ import { ZodError } from 'zod'
 import { getConfig } from './config/index.js'
 import { loggerMiddleware } from './middlewares/logger.middleware.js'
 import { authMiddleware } from './middlewares/auth.middleware.js'
+import { securityHeaders } from './middlewares/security-headers.middleware.js'
 import { AppError } from './shared/errors.js'
 import { healthRoutes } from './modules/health/health.routes.js'
 import { authRoutes } from './modules/auth/auth.routes.js'
@@ -35,13 +36,29 @@ import { buildSearchRouter } from './modules/search/search.routes.js'
 const config = getConfig()
 const app = new Hono()
 
-// ── 全局中间件 ─────────────────────────────────────────
+// ── 全局中间件 ─────────────────────────────────────────────
 app.use('*', loggerMiddleware)
+app.use('*', securityHeaders)
+
+/**
+ * CORS 配置：
+ * - 开发环境：允许 Vite 开发服务器端口
+ * - 生产环境：读取 ALLOWED_ORIGINS 环境变量（逗号分隔域名列表）
+ * - 不使用通配符 '*'（与 credentials:true 冲突，且有安全风险）
+ */
+const devOrigins = ['http://localhost:5173', 'http://localhost:4173', 'http://127.0.0.1:5173']
+const corsOrigins: string[] = config.NODE_ENV === 'development'
+  ? devOrigins
+  : config.ALLOWED_ORIGINS.length > 0
+    ? config.ALLOWED_ORIGINS
+    : []  // 生产环境未配置时拒绝所有跨域（安全默认値）
+
 app.use('/api/*', cors({
-  origin:       config.NODE_ENV === 'development' ? '*' : [],
-  allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  origin:       corsOrigins,
+  allowMethods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   credentials:  true,
+  maxAge:       86400,
 }))
 
 // ── 路由注册 ───────────────────────────────────────────
