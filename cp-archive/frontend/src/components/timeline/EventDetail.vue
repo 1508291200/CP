@@ -56,6 +56,13 @@
         @click="handleDelete"
       >删除</button>
     </div>
+
+    <!-- 事件关联 -->
+    <EventRelations
+      :event="event"
+      :cp-id="cpId"
+      @jump-to-event="$emit('jump-to-event', $event)"
+    />
   </div>
 </template>
 
@@ -67,6 +74,7 @@ import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import type { EventItem } from '@/types'
 import ImportanceTag from './ImportanceTag.vue'
+import EventRelations from './EventRelations.vue'
 import { usePermission } from '@/composables/usePermission'
 import { useEvent } from '@/composables/useEvent'
 
@@ -80,6 +88,7 @@ const emit = defineEmits<{
   deleted:            [id: string]
   'milestone-toggled': [value: boolean]
   'show-history':     []
+  'jump-to-event':    [eventId: string]
 }>()
 
 const { canInCp } = usePermission()

@@ -43,6 +43,21 @@ export interface BatchUpdateInput {
   removeTagIds?: string[]
 }
 
+export type RelationType = 'related' | 'caused_by' | 'led_to' | 'parallel'
+
+export interface EventRelation {
+  id:           string
+  relationType: string
+  createdAt:    string
+  event: {
+    id:          string
+    title:       string
+    eventDate:   string | null
+    importance:  string
+    isMilestone: boolean
+  }
+}
+
 export const eventApi = {
   list:            (cpId: string, params?: EventQueryParams) =>
     api.get<EventItem[]>(`/cps/${cpId}/events`, params as Record<string, unknown>),
@@ -61,6 +76,13 @@ export const eventApi = {
   // 批量操作
   batchUpdate: (cpId: string, data: BatchUpdateInput)                 => api.patch<{ updated: number }>(`/cps/${cpId}/events/batch`, data),
   batchDelete: (cpId: string, ids: string[])                          => api.delete<{ deleted: number }>(`/cps/${cpId}/events/batch`, { ids }),
+
+  // 事件关联
+  listRelations:  (cpId: string, id: string)                          => api.get<EventRelation[]>(`/cps/${cpId}/events/${id}/relations`),
+  addRelation:    (cpId: string, id: string, targetId: string, relationType: RelationType = 'related') =>
+    api.post<{ id: string; sourceId: string; targetId: string; relationType: string; createdAt: string }>(
+      `/cps/${cpId}/events/${id}/relations`, { targetId, relationType }),
+  removeRelation: (cpId: string, id: string, relationId: string)      => api.delete(`/cps/${cpId}/events/${id}/relations/${relationId}`),
 }
 
 // 模板 API

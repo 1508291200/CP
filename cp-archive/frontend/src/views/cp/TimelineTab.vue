@@ -125,6 +125,7 @@
       @milestone-toggled="onMilestoneToggled"
       @toggle-select="toggleSelect"
       @show-history="openVersionDrawer"
+      @jump-to-event="scrollToEvent"
     />
   </div>
 

@@ -56,6 +56,7 @@
         @deleted="$emit('deleted', event.id)"
         @milestone-toggled="$emit('milestone-toggled', event.id, $event)"
         @show-history="$emit('show-history', event)"
+        @jump-to-event="$emit('jump-to-event', $event)"
       />
     </Transition>
 
@@ -95,6 +96,7 @@ const emit = defineEmits<{
   'milestone-toggled': [id: string, value: boolean]
   'toggle-select':  [id: string]
   'show-history':   [event: EventItem]
+  'jump-to-event':  [eventId: string]
 }>()
 
 const isExpanded  = ref(false)

@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { createEventSchema, updateEventSchema, eventQuerySchema } from './event.schema.js'
 import * as eventService from './event.service.js'
+import * as relationsService from './event.relations.service.js'
 import { success } from '../../shared/response.js'
 import { cpPermissionMiddleware } from '../../middlewares/cp-permission.middleware.js'
 
@@ -80,6 +81,32 @@ export function buildEventRouter() {
       c.get('user').userId,
     )
     return c.json(success(restored))
+  })
+
+  // ── 事件关联 ─────────────────────────────────────────────
+  router.get('/:id/relations', async (c) =>
+    c.json(success(await relationsService.listRelations(c.req.param('cpId')!, c.req.param('id')!))))
+
+  router.post('/:id/relations', cpPermissionMiddleware('event:edit:own'),
+    zValidator('json', z.object({
+      targetId:     z.string().uuid(),
+      relationType: z.enum(['related', 'caused_by', 'led_to', 'parallel']).default('related'),
+    })),
+    async (c) => {
+      const { targetId, relationType } = c.req.valid('json')
+      const relation = await relationsService.addRelation(
+        c.req.param('cpId')!,
+        c.req.param('id')!,
+        targetId,
+        relationType,
+      )
+      return c.json(success(relation), 201)
+    },
+  )
+
+  router.delete('/:id/relations/:relationId', cpPermissionMiddleware('event:edit:own'), async (c) => {
+    await relationsService.removeRelation(c.req.param('cpId')!, c.req.param('relationId')!)
+    return c.json(success(null))
   })
 
   return router

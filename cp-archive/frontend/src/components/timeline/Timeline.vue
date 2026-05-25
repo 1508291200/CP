@@ -31,6 +31,7 @@
           @milestone-toggled="(id: string, val: boolean) => $emit('milestone-toggled', id, val)"
           @toggle-select="$emit('toggle-select', $event)"
           @show-history="$emit('show-history', $event)"
+          @jump-to-event="$emit('jump-to-event', $event)"
         />
       </div>
     </div>
@@ -59,6 +60,7 @@ defineEmits<{
   'milestone-toggled': [id: string, value: boolean]
   'toggle-select':     [id: string]
   'show-history':      [event: EventItem]
+  'jump-to-event':     [eventId: string]
 }>()
 
 interface Segment {
