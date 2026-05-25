@@ -38,10 +38,16 @@ export async function login(data: LoginInput) {
   const db = getDb()
   const [user] = await db.select().from(users).where(eq(users.username, data.username))
 
-  if (!user || !user.isActive) throw new UnauthorizedError('用户名或密码错误')
+  // 无论用户是否存在，都执行 bcrypt 比较，消除响应时序差异，防止用户名枚举攻击。
+  // 若用户不存在，使用一个预计算的虚假 hash（bcrypt 格式合法，但永远不匹配）。
+  const DUMMY_HASH = '$2b$12$invalidhashfortimingattttttttttttttttttttttt'
+  const hashToCompare = user?.passwordHash ?? DUMMY_HASH
+  const valid = await verifyPassword(data.password, hashToCompare)
 
-  const valid = await verifyPassword(data.password, user.passwordHash)
-  if (!valid) throw new UnauthorizedError('用户名或密码错误')
+  // 统一错误消息，不区分"用户不存在"和"密码错误"
+  if (!user || !user.isActive || !valid) {
+    throw new UnauthorizedError('用户名或密码错误')
+  }
 
   const [accessToken, refreshToken] = await Promise.all([
     signAccessToken({ userId: user.id, role: user.role }),
