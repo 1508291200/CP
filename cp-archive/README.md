@@ -22,6 +22,17 @@ cp-archive/
 - PostgreSQL 16（或 Docker）
 - Redis 7（或 Docker）
 
+### 克隆后首次设置
+
+```bash
+# 1. 安装 Git pre-commit hook（防止敏感信息提交）
+# Linux / macOS / Git Bash:
+sh scripts/security/install-hooks.sh
+
+# Windows cmd:
+scripts\security\install-hooks.bat
+```
+
 ### 后端
 
 ```bash

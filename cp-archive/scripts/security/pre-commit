@@ -1,0 +1,36 @@
+#!/bin/sh
+#
+# pre-commit hook: Secret Leak Scanner
+#
+# 在每次 git commit 前扫描 staged 文件，检测敏感信息泄露。
+#
+# 安装方式（已由 install-hooks.sh 自动完成）：
+#   cp scripts/security/pre-commit .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+#
+# 手动跳过（仅用于经过核实的误报）：
+#   git commit --no-verify
+#
+
+# 找到项目的 scan-secrets.mjs 脚本
+# Git hook 的工作目录是仓库根（.git 所在目录）
+SCRIPT="cp-archive/scripts/security/scan-secrets.mjs"
+
+if [ ! -f "$SCRIPT" ]; then
+  echo "[pre-commit] Warning: $SCRIPT not found, skipping secret scan."
+  exit 0
+fi
+
+# 运行扫描脚本（扫描 staged 文件）
+node "$SCRIPT"
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+  echo ""
+  echo "[pre-commit] ❌ Commit blocked due to potential secret leak."
+  echo "             Review the findings above, fix them, re-stage, and commit."
+  echo "             To skip (ONLY for verified false positives): git commit --no-verify"
+  exit 1
+fi
+
+exit 0
