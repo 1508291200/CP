@@ -7,4 +7,6 @@ dist/
 uploads/
 *.log
 .DS_Store
+# 测试/调试临时文件
+**/*.txt
 backend/src/scripts/
