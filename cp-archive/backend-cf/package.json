@@ -1,0 +1,29 @@
+{
+  "name": "cp-archive-backend-cf",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply cp-archive-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply cp-archive-db --remote",
+    "typecheck": "tsc --noEmit",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "hono": "^4.6.0",
+    "jose": "^6.2.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241218.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.9.0",
+    "drizzle-kit": "^0.30.6",
+    "drizzle-orm": "^0.40.1",
+    "typescript": "^5.6.3",
+    "wrangler": "^3.99.0"
+  }
+}
