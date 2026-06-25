@@ -21,8 +21,8 @@ migrations_dir = "migrations"
 [vars]
 NODE_ENV = "production"
 # 腾讯云 COS 配置
-COS_BUCKET = "cp-archive-media-1234567890"   # 替换为你的存储桶名称（含 APPID）
-COS_REGION = "ap-guangzhou"                  # 替换为你选择的地域
+COS_BUCKET = "cp-archive-media-1320730143"   # 替换为你的存储桶名称（含 APPID）
+COS_REGION = "ap-shanghai"                  # 替换为你选择的地域
 COS_URL_EXPIRES = "3600"                     # 预签名 URL 有效期（秒），3600 = 1小时
 
 # ── 开发环境配置 ────────────────────────────────────────
