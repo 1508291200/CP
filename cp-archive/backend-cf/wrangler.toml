@@ -6,14 +6,14 @@ compatibility_flags = ["nodejs_compat"]
 # ── Workers KV（Session + 限速）────────────────────────
 [[kv_namespaces]]
 binding = "KV"
-id = "placeholder_kv_id"
-preview_id = "placeholder_kv_preview_id"
+id = "a1f596247c7149f0b25cc4d983643fa3"
+preview_id = "a1f596247c7149f0b25cc4d983643fa3"
 
 # ── D1 数据库 ───────────────────────────────────────────
 [[d1_databases]]
 binding = "DB"
 database_name = "cp-archive-db"
-database_id = "placeholder_db_id"
+database_id = "eb8eb1e1-a5ee-40c0-9efa-d753793fdafb"
 migrations_dir = "migrations"
 
 # ── 环境变量（非敏感，放这里）──────────────────────────
