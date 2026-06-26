@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend-cf
+        working-directory: cp-archive/backend-cf
 
     steps:
       - uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
     needs: deploy-backend
     defaults:
       run:
-        working-directory: frontend
+        working-directory: cp-archive/frontend
 
     steps:
       - uses: actions/checkout@v4
@@ -75,4 +75,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=cp-archive-frontend --branch=main
+          command: pages deploy cp-archive/frontend/dist --project-name=cp-archive-frontend --branch=main
