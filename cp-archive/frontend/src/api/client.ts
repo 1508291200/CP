@@ -47,7 +47,11 @@ export class ApiClientError extends Error {
 
 // ── Axios 实例 ──────────────────────────────────────────
 const apiClient: AxiosInstance = axios.create({
-  baseURL: '/api/v1',
+  // VITE_API_BASE_URL 是 Workers 根地址（如 https://xxx.workers.dev）
+  // 加上 /api/v1 构成完整 baseURL
+  baseURL: import.meta.env.VITE_API_BASE_URL
+    ? `${import.meta.env.VITE_API_BASE_URL.replace(/\/$/,'')}/api/v1`
+    : '/api/v1',
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
