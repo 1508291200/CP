@@ -47,11 +47,9 @@ export class ApiClientError extends Error {
 
 // ── Axios 实例 ──────────────────────────────────────────
 const apiClient: AxiosInstance = axios.create({
-  // VITE_API_BASE_URL 是 Workers 根地址（如 https://xxx.workers.dev）
-  // 加上 /api/v1 构成完整 baseURL
-  baseURL: import.meta.env.VITE_API_BASE_URL
-    ? `${import.meta.env.VITE_API_BASE_URL.replace(/\/$/,'')}/api/v1`
-    : '/api/v1',
+  // 通过 Cloudflare Pages _redirects 将 /api/* 代理到 Workers
+  // 前端始终使用相对路径，无需配置跨域
+  baseURL: '/api/v1',
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
