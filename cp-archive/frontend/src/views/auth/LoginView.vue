@@ -61,6 +61,11 @@
             <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             {{ loading ? '登录中...' : '登录' }}
           </button>
+
+          <p class="text-center text-sm text-[var(--color-text-secondary)]">
+            没有账号？
+            <router-link to="/register" class="text-[var(--color-primary)] hover:underline">注册账号</router-link>
+          </p>
         </form>
       </div>
     </div>
