@@ -11,6 +11,52 @@ export interface ToastItem {
   message: string
 }
 
+// 深色模式下的 CSS token 值（与 themes/dark.ts 保持一致）
+const DARK_TOKENS: Record<string, string> = {
+  '--color-primary':        '#9B7FCA',
+  '--color-primary-light':  '#B89EE0',
+  '--color-primary-bg':     '#2A2240',
+  '--color-bg-page':        '#1A1826',
+  '--color-bg-card':        '#242133',
+  '--color-bg-sidebar':     '#1E1C2E',
+  '--color-text-title':     '#EEEEF5',
+  '--color-text-body':      '#B8B8D0',
+  '--color-text-secondary': '#6A6A80',
+  '--color-text-disabled':  '#3A3A50',
+  '--color-border':         '#333248',
+  '--color-border-input':   '#3D3C55',
+  '--shadow-card':          '0 2px 12px rgba(0, 0, 0, 0.24)',
+  '--shadow-hover':         '0 6px 20px rgba(0, 0, 0, 0.32)',
+  '--shadow-modal':         '0 12px 40px rgba(0, 0, 0, 0.40)',
+}
+
+// 默认浅色模式下的 CSS token 值（与 themes/default.ts 保持一致）
+const LIGHT_TOKENS: Record<string, string> = {
+  '--color-primary':        '#7B5EA7',
+  '--color-primary-light':  '#9B7FCA',
+  '--color-primary-bg':     '#F3EFFA',
+  '--color-bg-page':        '#F7F6FA',
+  '--color-bg-card':        '#FFFFFF',
+  '--color-bg-sidebar':     '#F9F8FC',
+  '--color-text-title':     '#1A1A2E',
+  '--color-text-body':      '#3D3D5C',
+  '--color-text-secondary': '#8A8AA0',
+  '--color-text-disabled':  '#C4C4D4',
+  '--color-border':         '#EBEBF0',
+  '--color-border-input':   '#D8D8E8',
+  '--shadow-card':          '0 2px 12px rgba(0, 0, 0, 0.06)',
+  '--shadow-hover':         '0 6px 20px rgba(0, 0, 0, 0.10)',
+  '--shadow-modal':         '0 12px 40px rgba(0, 0, 0, 0.14)',
+}
+
+/** 将 token map 写入 documentElement.style（内联样式，优先级最高） */
+function applyTokens(tokens: Record<string, string>) {
+  const root = document.documentElement
+  for (const [key, val] of Object.entries(tokens)) {
+    root.style.setProperty(key, val)
+  }
+}
+
 export const useUIStore = defineStore('ui', () => {
   const isDark = ref(
     localStorage.getItem('cp:dark') === 'true' ||
@@ -23,57 +69,18 @@ export const useUIStore = defineStore('ui', () => {
     isDark.value = !isDark.value
     localStorage.setItem('cp:dark', String(isDark.value))
     document.documentElement.classList.toggle('dark', isDark.value)
-    // 同步立即生效一次
-    applyDarkTokens(isDark.value)
-    // Vue 响应式 flush 后再执行一次，防止 watcher 覆盖
-    const target = isDark.value
-    setTimeout(() => applyDarkTokens(target), 0)
+
+    const tokens = isDark.value ? DARK_TOKENS : LIGHT_TOKENS
+    applyTokens(tokens)
+    // Vue 响应式 flush 后再覆写一次，防止其他 watcher 把值还原
+    const snapshot = { ...tokens }
+    setTimeout(() => applyTokens(snapshot), 0)
   }
 
   function initDark() {
     document.documentElement.classList.toggle('dark', isDark.value)
     if (isDark.value) {
-      applyDarkTokens(true)
-    }
-  }
-
-  function applyDarkTokens(dark: boolean) {
-    const root = document.documentElement
-    if (dark) {
-      root.style.setProperty('--color-primary',        '#9B7FCA')
-      root.style.setProperty('--color-primary-light',  '#B89EE0')
-      root.style.setProperty('--color-primary-bg',     '#2A2240')
-      root.style.setProperty('--color-bg-page',        '#1A1826')
-      root.style.setProperty('--color-bg-card',        '#242133')
-      root.style.setProperty('--color-bg-sidebar',     '#1E1C2E')
-      root.style.setProperty('--color-text-title',     '#EEEEF5')
-      root.style.setProperty('--color-text-body',      '#B8B8D0')
-      root.style.setProperty('--color-text-secondary', '#6A6A80')
-      root.style.setProperty('--color-text-disabled',  '#3A3A50')
-      root.style.setProperty('--color-border',         '#333248')
-      root.style.setProperty('--color-border-input',   '#3D3C55')
-      root.style.setProperty('--shadow-card',          '0 2px 12px rgba(0, 0, 0, 0.24)')
-      root.style.setProperty('--shadow-hover',         '0 6px 20px rgba(0, 0, 0, 0.32)')
-      root.style.setProperty('--shadow-modal',         '0 12px 40px rgba(0, 0, 0, 0.40)')
-    } else {
-      const savedId = localStorage.getItem('cp:themeId')
-      if (!savedId || savedId === 'dark') {
-        root.style.setProperty('--color-primary',        '#7B5EA7')
-        root.style.setProperty('--color-primary-light',  '#9B7FCA')
-        root.style.setProperty('--color-primary-bg',     '#F3EFFA')
-        root.style.setProperty('--color-bg-page',        '#F7F6FA')
-        root.style.setProperty('--color-bg-card',        '#FFFFFF')
-        root.style.setProperty('--color-bg-sidebar',     '#F9F8FC')
-        root.style.setProperty('--color-text-title',     '#1A1A2E')
-        root.style.setProperty('--color-text-body',      '#3D3D5C')
-        root.style.setProperty('--color-text-secondary', '#8A8AA0')
-        root.style.setProperty('--color-text-disabled',  '#C4C4D4')
-        root.style.setProperty('--color-border',         '#EBEBF0')
-        root.style.setProperty('--color-border-input',   '#D8D8E8')
-        root.style.setProperty('--shadow-card',          '0 2px 12px rgba(0, 0, 0, 0.06)')
-        root.style.setProperty('--shadow-hover',         '0 6px 20px rgba(0, 0, 0, 0.10)')
-        root.style.setProperty('--shadow-modal',         '0 12px 40px rgba(0, 0, 0, 0.14)')
-      }
+      applyTokens(DARK_TOKENS)
     }
   }
 
