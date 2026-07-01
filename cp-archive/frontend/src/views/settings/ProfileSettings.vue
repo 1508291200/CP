@@ -66,7 +66,11 @@ async function handleSave() {
   saving.value = true
   msg.value = ''
   try {
-    await userStore.updateMe({ displayName: form.displayName, avatarUrl: form.avatarUrl })
+    await userStore.updateMe({
+      displayName: form.displayName,
+      // 空字符串转为 undefined（不更新），避免后端 URL 校验失败
+      avatarUrl: form.avatarUrl || undefined,
+    })
     msg.value = '保存成功'
     msgType.value = 'ok'
   } catch {
