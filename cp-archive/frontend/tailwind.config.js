@@ -2,8 +2,8 @@
 export default {
   // 仅扫描 src 目录，避免误扫描 node_modules
   content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
-  // 深色模式通过 class 控制（配合主题系统）
-  darkMode: 'class',
+  // 深色模式通过 html 元素的 class 控制（html.dark 特异性高于 :root，保证覆盖）
+  darkMode: ['class', 'html.dark'],
   theme: {
     extend: {
       // 颜色系统全部引用 CSS 变量，支持运行时主题切换
@@ -47,6 +47,15 @@ export default {
       },
       transitionDuration: {
         DEFAULT: 'var(--duration-normal)',
+      },
+      animation: {
+        shimmer: 'shimmer 1.6s infinite',
+      },
+      keyframes: {
+        shimmer: {
+          '0%':   { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(200%)' },
+        },
       },
     },
   },
