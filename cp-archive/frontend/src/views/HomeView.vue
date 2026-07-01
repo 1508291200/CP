@@ -26,9 +26,10 @@
           <!-- 通知铃铛 -->
           <NotificationBell />
           <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-full bg-[var(--color-primary-bg)] flex items-center justify-center text-xs font-medium text-[var(--color-primary)]">
-              {{ authStore.user?.displayName?.[0] ?? authStore.user?.username?.[0]?.toUpperCase() }}
-            </div>
+            <button class="w-7 h-7 rounded-full overflow-hidden bg-[var(--color-primary-bg)] flex items-center justify-center text-xs font-medium text-[var(--color-primary)] flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-[var(--color-primary)] transition-all" @click="router.push('/settings/profile')">
+              <img v-if="authStore.user?.avatarUrl" :src="authStore.user.avatarUrl" class="w-full h-full object-cover" :alt="authStore.user?.displayName ?? authStore.user?.username" />
+              <span v-else>{{ authStore.user?.displayName?.[0] ?? authStore.user?.username?.[0]?.toUpperCase() }}</span>
+            </button>
             <button class="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-danger)]" @click="authStore.logout()">
               退出
             </button>
