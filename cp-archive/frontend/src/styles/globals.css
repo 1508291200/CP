@@ -68,7 +68,7 @@
 }
 
 /* ── 深色主题 ─────────────────────────────────────────── */
-.dark {
+html.dark {
   --color-primary:        #9B7FCA;
   --color-primary-light:  #B89EE0;
   --color-primary-bg:     #2A2240;
