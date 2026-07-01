@@ -17,7 +17,7 @@ export const mediaApi = {
 
     return new Promise((resolve, reject) => {
       apiClient
-        .post<ApiSuccess<MediaRecord>>('/api/v1/media/upload', formData, {
+        .post<ApiSuccess<MediaRecord>>('/media/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
           onUploadProgress(e) {
             if (onProgress && e.total) {
@@ -31,6 +31,6 @@ export const mediaApi = {
   },
 
   delete(id: string) {
-    return apiClient.delete(`/api/v1/media/${id}`)
+    return apiClient.delete(`/media/${id}`)
   },
 }
