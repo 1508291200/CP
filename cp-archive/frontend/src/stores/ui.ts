@@ -23,7 +23,11 @@ export const useUIStore = defineStore('ui', () => {
     isDark.value = !isDark.value
     localStorage.setItem('cp:dark', String(isDark.value))
     document.documentElement.classList.toggle('dark', isDark.value)
+    // 同步立即生效一次
     applyDarkTokens(isDark.value)
+    // Vue 响应式 flush 后再执行一次，防止 watcher 覆盖
+    const target = isDark.value
+    setTimeout(() => applyDarkTokens(target), 0)
   }
 
   function initDark() {
