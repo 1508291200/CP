@@ -35,7 +35,7 @@ userRouter.patch('/me', async (c) => {
   const body = await c.req.json().catch(() => null)
   const parsed = z.object({
     displayName:  z.string().max(100).optional(),
-    avatarUrl:    z.string().url().optional(),
+    avatarUrl:    z.string().url().or(z.literal('')).optional().nullable(),
     preferences:  z.record(z.unknown()).optional(),
     newPassword:  z.string().min(8).optional(),
     oldPassword:  z.string().optional(),
