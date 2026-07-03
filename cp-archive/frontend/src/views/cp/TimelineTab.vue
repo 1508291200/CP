@@ -4,7 +4,7 @@
     <div class="flex items-center gap-3 mb-6 flex-wrap">
       <!-- 关键词搜索 -->
       <div class="relative flex-1 min-w-[180px] max-w-xs">
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-disabled)] text-xs">🔍</span>
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-disabled)] text-xs"></span>
         <input
           v-model="filterKeyword"
           placeholder="搜索事件"
@@ -40,12 +40,12 @@
           ? 'border-[var(--color-primary)] bg-[var(--color-primary-bg)] text-[var(--color-primary)]'
           : 'border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)]'"
         @click="toggleBatchMode"
-      >☑ 批量</button>
+      >批量</button>
 
       <!-- 新增按钮 -->
       <div class="flex gap-2 ml-auto">
         <Button v-if="canInCp(cpId, 'event:create')" size="sm" variant="ghost" @click="showQuickInput = !showQuickInput">
-          ⚡ 快速录入
+          快速录入
         </Button>
         <Button v-if="canInCp(cpId, 'event:create')" size="sm" @click="openCreateModal">
           + 新增事件
