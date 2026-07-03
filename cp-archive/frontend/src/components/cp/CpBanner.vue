@@ -10,7 +10,7 @@
       <!-- 封面缩略图 -->
       <div class="w-16 h-16 rounded-[var(--radius-card)] overflow-hidden flex-shrink-0 shadow-[var(--shadow-card)] bg-[var(--color-bg-page)]">
         <img v-if="cp?.coverUrl" :src="cp.coverUrl" :alt="cp.name" class="w-full h-full object-cover" />
-        <div v-else class="w-full h-full flex items-center justify-center text-2xl">💕</div>
+        <div v-else class="w-full h-full flex items-center justify-center text-xl text-[var(--color-text-disabled)]">CP</div>
       </div>
 
       <!-- 标题信息 -->
