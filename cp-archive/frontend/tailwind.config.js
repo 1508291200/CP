@@ -48,6 +48,15 @@ export default {
       transitionDuration: {
         DEFAULT: 'var(--duration-normal)',
       },
+      fontSize: {
+        xs:   ['0.8125rem', { lineHeight: '1.5' }],
+        sm:   ['0.9375rem', { lineHeight: '1.6' }],
+        base: ['1rem',      { lineHeight: '1.7' }],
+        lg:   ['1.125rem',  { lineHeight: '1.7' }],
+        xl:   ['1.25rem',   { lineHeight: '1.6' }],
+        '2xl':['1.5rem',    { lineHeight: '1.5' }],
+        '3xl':['1.875rem',  { lineHeight: '1.4' }],
+      },
       animation: {
         shimmer: 'shimmer 1.6s infinite',
       },
