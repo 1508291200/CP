@@ -7,7 +7,7 @@
           class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-body)] transition-colors text-sm"
           :title="uiStore.isDark ? '切换到浅色' : '切换到深色'"
           @click="uiStore.toggleDark()"
-        >{{ uiStore.isDark ? '☀️' : '🌙' }}</button>
+        >{{ uiStore.isDark ? '浅色' : '深色' }}</button>
         <button
           v-if="can('cp:create')"
           class="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
