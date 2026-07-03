@@ -175,7 +175,6 @@ const importanceOptions = [
   { value: 'high',     label: '重要' },
   { value: 'medium',   label: '一般' },
   { value: 'normal',   label: '普通' },
-  { value: 'low',      label: '备注' },
 ]
 
 const emotionEmojis = ['💕', '🌟', '😭', '😂', '🔥', '💎', '🎉', '💔', '✨', '🥺']
