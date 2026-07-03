@@ -35,7 +35,7 @@
           <span v-if="event.sourceRef" class="text-xs text-[var(--color-primary)] opacity-70 truncate max-w-[120px]">
             {{ event.sourceRef }}
           </span>
-          <span v-if="event.isMilestone" class="text-xs text-[var(--color-high)]">🌟 里程碑</span>
+          <span v-if="event.isMilestone" class="text-xs text-[var(--color-high)]">里程碑</span>
         </div>
       </div>
 
