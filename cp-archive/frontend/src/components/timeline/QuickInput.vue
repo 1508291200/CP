@@ -27,7 +27,6 @@
         <option value="high">重要</option>
         <option value="medium">一般</option>
         <option value="normal">普通</option>
-        <option value="low">备注</option>
       </select>
 
       <!-- 保存 -->
