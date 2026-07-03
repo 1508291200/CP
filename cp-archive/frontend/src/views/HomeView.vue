@@ -10,15 +10,15 @@
             class="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-primary-bg)] transition-colors text-base"
             @click="uiStore.toggleDark()"
             :title="uiStore.isDark ? '切换到浅色模式' : '切换到深色模式'"
-          >{{ uiStore.isDark ? '☀️' : '🌙' }}</button>
+          >{{ uiStore.isDark ? '浅色' : '深色' }}</button>
           <button
             class="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-primary-bg)] transition-colors text-base"
             @click="router.push('/settings/theme')" title="主题设置"
-          >🎨</button>
+          >主题</button>
           <button
             class="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-primary-bg)] transition-colors text-base"
             title="全局搜索" @click="router.push('/search')"
-          >🔍</button>
+          >搜索</button>
           <NotificationBell />
           <div class="flex items-center gap-2">
             <button
@@ -39,20 +39,15 @@
     <div class="max-w-5xl mx-auto px-6 py-10">
       <!-- Hero 区 -->
       <div class="text-center mb-10 relative">
-        <div class="absolute inset-0 overflow-hidden pointer-events-none select-none">
-          <span v-for="i in 8" :key="i" class="absolute text-[var(--color-primary)] opacity-10 text-xl"
-            :style="{ left: `${(i * 13) % 100}%`, top: `${(i * 17) % 100}%` }">✦</span>
-        </div>
         <h1 class="text-3xl font-bold text-[var(--color-text-title)] mb-2">
           记录每一份<span class="text-[var(--color-primary)]">心动</span>的轨迹
         </h1>
         <p class="text-[var(--color-text-secondary)] text-sm mb-6">你的 CP 时间线收藏站</p>
         <div class="relative max-w-md mx-auto">
-          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-disabled)]">🔍</span>
           <input
             v-model="searchInput"
             placeholder="搜索 CP / 作品 / 人物"
-            class="w-full pl-10 pr-4 py-3 rounded-full border border-[var(--color-border-input)] bg-[var(--color-bg-card)] text-[var(--color-text-body)] text-sm outline-none focus:border-[var(--color-primary)] shadow-[var(--shadow-card)] transition-all"
+            class="w-full px-4 py-3 rounded-full border border-[var(--color-border-input)] bg-[var(--color-bg-card)] text-[var(--color-text-body)] text-sm outline-none focus:border-[var(--color-primary)] shadow-[var(--shadow-card)] transition-all"
           />
         </div>
       </div>
@@ -79,7 +74,6 @@
 
       <!-- 空状态 -->
       <div v-else-if="!cpStore.loading && !cpStore.list.length" class="text-center py-20">
-        <div class="text-5xl mb-4">💕</div>
         <p class="text-[var(--color-text-secondary)] mb-4">还没有任何 CP</p>
         <Button v-if="isAdmin" @click="showCreateModal = true">创建第一对 CP</Button>
         <p v-else class="text-sm text-[var(--color-text-disabled)]">暂无内容</p>
