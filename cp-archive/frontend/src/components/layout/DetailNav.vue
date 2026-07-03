@@ -12,8 +12,7 @@
         <div v-if="cp" class="min-w-0">
           <div class="flex items-center gap-1.5">
             <span class="font-semibold text-sm text-[var(--color-text-title)] truncate">{{ cp.name }}</span>
-            <span class="text-[var(--color-primary)] text-sm">♡</span>
-          </div>
+              </div>
           <p v-if="cp.subtitle" class="text-xs text-[var(--color-text-secondary)] truncate leading-none">
             {{ cp.subtitle }}
           </p>
@@ -46,7 +45,7 @@
           class="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
           title="搜索"
           @click="router.push({ path: '/search', query: { cpId: cpId } })"
-        >🔍</button>
+        >搜索</button>
         <slot name="actions" />
       </div>
     </div>
