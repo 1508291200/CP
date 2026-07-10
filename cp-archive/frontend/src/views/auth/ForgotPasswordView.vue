@@ -129,7 +129,7 @@ function startCountdown() {
 async function handleSendCode() {
   globalError.value = ''; emailError.value = ''
   if (!email.value.trim()) { emailError.value = '请输入邮箱'; return }
-  if (!/^[^s@]+@[^s@]+.[^s@]+$/.test(email.value.trim())) { emailError.value = '邮箱格式不正确'; return }
+  if (!/^$/.test(email.value.trim())) { emailError.value = '邮箱格式不正确'; return }
   loading.value = true
   try { await authApi.forgotPassword(email.value.trim()); step.value = 2; startCountdown() }
   catch (err) { globalError.value = err instanceof ApiClientError ? err.message : '发送失败，请稍后重试' }
