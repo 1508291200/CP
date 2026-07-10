@@ -15,7 +15,7 @@
               <input v-model="email" type="email" placeholder="请输入注册邮箱" autocomplete="email" class="w-full px-4 py-2.5 rounded-[var(--radius-input)] border border-[var(--color-border-input)] bg-[var(--color-bg-page)] text-[var(--color-text-body)] text-sm outline-none transition-colors focus:border-[var(--color-primary)] placeholder:text-[var(--color-text-disabled)]" :class="{ 'border-[var(--color-danger)]': emailError }" />
               <span v-if="emailError" class="text-xs text-[var(--color-danger)]">{{ emailError }}</span>
             </div>
-            <div v-if="globalError" class="text-sm text-[var(--color-danger)] text-center bg-red-50 dark:bg-red-900/20 rounded-lg py-2 px-3">{{ globalError }}</div>
+            <div v-if="globalError" class="text-sm text-[var(--color-danger)] text-center bg-red-50 rounded-lg py-2 px-3">{{ globalError }}</div>
             <button type="submit" :disabled="loading" class="w-full py-2.5 rounded-[var(--radius-btn)] bg-[var(--color-primary)] text-white font-medium text-sm transition-opacity hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
               <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               {{ loading ? '发送中...' : '发送验证码' }}
@@ -24,14 +24,14 @@
         </div>
         <div v-else-if="step === 2">
           <h2 class="text-base font-semibold text-[var(--color-text-body)] mb-1">输入验证码</h2>
-          <p class="text-sm text-[var(--color-text-secondary)] mb-5">验证码已发送至 <span class="text-[var(--color-text-body)] font-medium">{{ maskedEmail }}</span>，请在10分钟内输入。</p>
+          <p class="text-sm text-[var(--color-text-secondary)] mb-5">验证码已发送至 <span class="font-medium">{{ maskedEmail }}</span>，请在10分钟内输入。</p>
           <form @submit.prevent="handleVerifyCode" class="flex flex-col gap-4">
             <div class="flex flex-col gap-1.5">
               <label class="text-sm font-medium text-[var(--color-text-body)]">验证码</label>
               <input v-model="code" type="text" inputmode="numeric" maxlength="6" placeholder="请输入6位验证码" autocomplete="one-time-code" class="w-full px-4 py-2.5 rounded-[var(--radius-input)] border border-[var(--color-border-input)] bg-[var(--color-bg-page)] text-[var(--color-text-body)] text-sm outline-none transition-colors focus:border-[var(--color-primary)] placeholder:text-[var(--color-text-disabled)] tracking-widest text-center text-lg" :class="{ 'border-[var(--color-danger)]': codeError }" />
               <span v-if="codeError" class="text-xs text-[var(--color-danger)]">{{ codeError }}</span>
             </div>
-            <div v-if="globalError" class="text-sm text-[var(--color-danger)] text-center bg-red-50 dark:bg-red-900/20 rounded-lg py-2 px-3">{{ globalError }}</div>
+            <div v-if="globalError" class="text-sm text-[var(--color-danger)] text-center bg-red-50 rounded-lg py-2 px-3">{{ globalError }}</div>
             <button type="submit" :disabled="loading || code.length !== 6" class="w-full py-2.5 rounded-[var(--radius-btn)] bg-[var(--color-primary)] text-white font-medium text-sm transition-opacity hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
               <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               {{ loading ? '验证中...' : '下一步' }}
@@ -56,7 +56,7 @@
               <input v-model="confirmPassword" type="password" placeholder="请再次输入新密码" autocomplete="new-password" class="w-full px-4 py-2.5 rounded-[var(--radius-input)] border border-[var(--color-border-input)] bg-[var(--color-bg-page)] text-[var(--color-text-body)] text-sm outline-none transition-colors focus:border-[var(--color-primary)] placeholder:text-[var(--color-text-disabled)]" :class="{ 'border-[var(--color-danger)]': confirmPasswordError }" />
               <span v-if="confirmPasswordError" class="text-xs text-[var(--color-danger)]">{{ confirmPasswordError }}</span>
             </div>
-            <div v-if="globalError" class="text-sm text-[var(--color-danger)] text-center bg-red-50 dark:bg-red-900/20 rounded-lg py-2 px-3">{{ globalError }}</div>
+            <div v-if="globalError" class="text-sm text-[var(--color-danger)] text-center bg-red-50 rounded-lg py-2 px-3">{{ globalError }}</div>
             <button type="submit" :disabled="loading" class="w-full py-2.5 rounded-[var(--radius-btn)] bg-[var(--color-primary)] text-white font-medium text-sm transition-opacity hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
               <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               {{ loading ? '提交中...' : '确认修改密码' }}
@@ -64,7 +64,7 @@
           </form>
         </div>
         <div v-else-if="step === 4" class="text-center py-4">
-          <div class="w-14 h-14 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
+          <div class="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
             <svg class="w-7 h-7 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
           </div>
           <h2 class="text-base font-semibold text-[var(--color-text-body)] mb-2">密码修改成功</h2>
@@ -112,8 +112,7 @@ onUnmounted(() => {
 const maskedEmail = computed(() => {
   const parts = email.value.split('@')
   if (parts.length !== 2) return email.value
-  const name = parts[0]
-  const domain = parts[1]
+  const name = parts[0]; const domain = parts[1]
   if (name.length <= 2) return `*@${domain}`
   return `${name.slice(0, 2)}${'*'.repeat(name.length - 2)}@${domain}`
 })
@@ -130,38 +129,32 @@ function startCountdown() {
 async function handleSendCode() {
   globalError.value = ''; emailError.value = ''
   if (!email.value.trim()) { emailError.value = '请输入邮箱'; return }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) { emailError.value = '邮箱格式不正确'; return }
+  if (!/^[^s@]+@[^s@]+.[^s@]+$/.test(email.value.trim())) { emailError.value = '邮箱格式不正确'; return }
   loading.value = true
-  try {
-    await authApi.forgotPassword(email.value.trim())
-    step.value = 2; startCountdown()
-  } catch (err) {
-    globalError.value = err instanceof ApiClientError ? err.message : '发送失败，请稍后重试'
-  } finally { loading.value = false }
+  try { await authApi.forgotPassword(email.value.trim()); step.value = 2; startCountdown() }
+  catch (err) { globalError.value = err instanceof ApiClientError ? err.message : '发送失败，请稍后重试' }
+  finally { loading.value = false }
 }
 
 async function handleResend() {
   globalError.value = ''; resending.value = true
-  try {
-    await authApi.forgotPassword(email.value.trim())
-    code.value = ''; codeError.value = ''; startCountdown()
-  } catch (err) {
-    globalError.value = err instanceof ApiClientError ? err.message : '发送失败，请稍后重试'
-  } finally { resending.value = false }
+  try { await authApi.forgotPassword(email.value.trim()); code.value = ''; codeError.value = ''; startCountdown() }
+  catch (err) { globalError.value = err instanceof ApiClientError ? err.message : '发送失败，请稍后重试' }
+  finally { resending.value = false }
 }
 
 async function handleVerifyCode() {
   globalError.value = ''; codeError.value = ''
   if (code.value.length !== 6) { codeError.value = '请输入6位验证码'; return }
-  if (!/^\d{6}$/.test(code.value)) { codeError.value = '验证码应为6位数字'; return }
+  if (!/^d{6}$/.test(code.value)) { codeError.value = '验证码应为6位数字'; return }
   loading.value = true
   try {
     const result = await authApi.verifyResetCode(email.value.trim(), code.value)
     resetToken.value = result.resetToken; step.value = 3
     if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null }
-  } catch (err) {
-    globalError.value = err instanceof ApiClientError ? err.message : '验证失败，请稍后重试'
-  } finally { loading.value = false }
+  }
+  catch (err) { globalError.value = err instanceof ApiClientError ? err.message : '验证失败，请稍后重试' }
+  finally { loading.value = false }
 }
 
 async function handleResetPassword() {
@@ -176,8 +169,8 @@ async function handleResetPassword() {
       redirectCountdown.value--
       if (redirectCountdown.value <= 0) { if (redirectTimer) clearInterval(redirectTimer); router.push('/login') }
     }, 1000)
-  } catch (err) {
-    globalError.value = err instanceof ApiClientError ? err.message : '重置失败，请稍后重试'
-  } finally { loading.value = false }
+  }
+  catch (err) { globalError.value = err instanceof ApiClientError ? err.message : '重置失败，请稍后重试' }
+  finally { loading.value = false }
 }
 </script>
