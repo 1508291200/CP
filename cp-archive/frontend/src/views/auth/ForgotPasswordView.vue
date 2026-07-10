@@ -150,7 +150,7 @@ async function handleVerifyCode() {
   loading.value = true
   try {
     const result = await authApi.verifyResetCode(email.value.trim(), code.value)
-    resetToken.value = result.resetToken; step.value = 3
+    resetToken.value = result.data.resetToken; step.value = 3
     if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null }
   }
   catch (err) { globalError.value = err instanceof ApiClientError ? err.message : '验证失败，请稍后重试' }
