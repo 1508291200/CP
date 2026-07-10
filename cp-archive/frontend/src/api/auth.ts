@@ -45,12 +45,9 @@ export const authApi = {
   me:       () => api.get<AuthUser>('/auth/me'),
 
   // 忘记密码三步流程
-  forgotPassword:  (email: string) =>
-    api.post<null>('/auth/forgot-password', { email }),
-  verifyResetCode: (email: string, code: string) =>
-    api.post<{ resetToken: string }>('/auth/verify-reset-code', { email, code }),
-  resetPassword:   (resetToken: string, newPassword: string) =>
-    api.post<null>('/auth/reset-password', { resetToken, newPassword }),
+  forgotPassword:  (email: string) => api.post<null>('/auth/forgot-password', { email }),
+  verifyResetCode: (email: string, code: string) => api.post<{ resetToken: string }>('/auth/verify-reset-code', { email, code }),
+  resetPassword:   (resetToken: string, newPassword: string) => api.post<null>('/auth/reset-password', { resetToken, newPassword }),
 }
 
 // 具名导出供 RegisterView 直接使用
