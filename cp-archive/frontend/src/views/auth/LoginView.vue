@@ -66,6 +66,9 @@
             没有账号？
             <router-link to="/register" class="text-[var(--color-primary)] hover:underline">注册账号</router-link>
           </p>
+          <p class="text-center text-sm">
+            <router-link to="/forgot-password" class="text-[var(--color-text-disabled)] hover:text-[var(--color-primary)] transition-colors">忘记密码？</router-link>
+          </p>
         </form>
       </div>
     </div>
