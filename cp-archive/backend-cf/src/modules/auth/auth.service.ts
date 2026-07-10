@@ -24,6 +24,15 @@ import {
 } from '../../utils/kv-session.js'
 import { newId, nowSec, fromSec } from '../../utils/id.js'
 import type { LoginInput, RegisterInput } from './auth.schema.js'
+import {
+  setResetCode,
+  getResetCode,
+  deleteResetCode,
+  setResetToken,
+  getResetToken,
+  deleteResetToken,
+} from '../../utils/kv-reset-code.js'
+import { sendResetCodeEmail } from '../../utils/email.js'
 import type { Env } from '../../types/env.js'
 
 // 脱敏：去掉 passwordHash
@@ -166,3 +175,71 @@ export async function getMe(userId: string, env: Env) {
   const cpMemberships = await getCpMemberships(db, userId)
   return { ...buildUserPublic(user), cpMemberships }
 }
+
+// ── 忘记密码流程 ─────────────────────────────────────────────────────────────
+
+/**
+ * 步骤1：发送密码重置验证码邮件
+ * 注意：无论邮箱是否存在都返回成功，防止邮箱枚举攻击。
+ */
+export async function forgotPassword(email: string, env: Env): Promise<void> {
+  const db = getDb(env.DB)
+  const [user] = await db.select().from(users).where(eq(users.email, email))
+
+  // 邮箱不存在：静默返回（不暴露邮箱是否注册）
+  if (!user || !user.isActive) return
+
+  // 生成6位随机数字验证码
+  const code = String(Math.floor(100000 + Math.random() * 900000))
+
+  // 存入 KV（TTL 10 分钟）
+  await setResetCode(env.KV, email, code, user.id)
+
+  // 发送邮件
+  const apiKey = env.RESEND_API_KEY
+  const from   = env.EMAIL_FROM || 'CP档案站 <onboarding@resend.dev>'
+  await sendResetCodeEmail(apiKey, from, email, code, user.displayName ?? user.username)
+}
+
+/**
+ * 步骤2：验证验证码，返回 resetToken
+ */
+export async function verifyResetCode(email: string, code: string, env: Env): Promise<string> {
+  const stored = await getResetCode(env.KV, email)
+  if (!stored) throw new ValidationError('验证码无效或已过期')
+
+  // 常数时间字符串比较，防止时序攻击
+  if (stored.code !== code) {
+    throw new ValidationError('验证码错误')
+  }
+
+  // 验证码一次性，立即删除
+  await deleteResetCode(env.KV, email)
+
+  // 生成重置令牌（UUID）
+  const resetToken = crypto.randomUUID()
+  await setResetToken(env.KV, resetToken, stored.userId)
+
+  return resetToken
+}
+
+/**
+ * 步骤3：使用 resetToken 设置新密码
+ */
+export async function resetPassword(resetToken: string, newPassword: string, env: Env): Promise<void> {
+  const userId = await getResetToken(env.KV, resetToken)
+  if (!userId) throw new ValidationError('重置令牌无效或已过期')
+
+  const db = getDb(env.DB)
+  const now = fromSec(nowSec())
+
+  const passwordHash = await hashPassword(newPassword)
+
+  await db
+    .update(users)
+    .set({ passwordHash, updatedAt: now })
+    .where(eq(users.id, userId))
+
+  // 立即使令牌失效（一次性使用）
+  await deleteResetToken(env.KV, resetToken)
+    }
