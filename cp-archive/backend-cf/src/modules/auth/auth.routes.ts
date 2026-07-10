@@ -8,7 +8,7 @@
  */
 import { Hono } from 'hono'
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie'
-import { loginSchema, registerSchema } from './auth.schema.js'
+import { loginSchema, registerSchema, forgotPasswordSchema, verifyResetCodeSchema, resetPasswordSchema } from './auth.schema.js'
 import * as authService from './auth.service.js'
 import { success } from '../../shared/response.js'
 import { authMiddleware } from '../../middlewares/auth.middleware.js'
@@ -89,5 +89,44 @@ auth.get('/me', authMiddleware, async (c) => {
   const user = await authService.getMe(userId, c.env)
   return c.json(success(user))
 })
+
+// POST /auth/forgot-password
+auth.post('/forgot-password',
+  rateLimit({ max: 5, windowMs: 3_600_000 }),
+  async (c) => {
+    const body = await c.req.json().catch(() => null)
+    const parsed = forgotPasswordSchema.safeParse(body)
+    if (!parsed.success) throw new ValidationError('请求数据格式错误', parsed.error.flatten())
+
+    await authService.forgotPassword(parsed.data.email, c.env)
+    return c.json({ success: true, data: null, message: '如果该邮箱已注册，验证码已发送，请查收邮件' })
+  },
+)
+
+// POST /auth/verify-reset-code
+auth.post('/verify-reset-code',
+  rateLimit({ max: 10, windowMs: 15 * 60_000 }),
+  async (c) => {
+    const body = await c.req.json().catch(() => null)
+    const parsed = verifyResetCodeSchema.safeParse(body)
+    if (!parsed.success) throw new ValidationError('请求数据格式错误', parsed.error.flatten())
+
+    const resetToken = await authService.verifyResetCode(parsed.data.email, parsed.data.code, c.env)
+    return c.json(success({ resetToken }))
+  },
+)
+
+// POST /auth/reset-password
+auth.post('/reset-password',
+  rateLimit({ max: 5, windowMs: 15 * 60_000 }),
+  async (c) => {
+    const body = await c.req.json().catch(() => null)
+    const parsed = resetPasswordSchema.safeParse(body)
+    if (!parsed.success) throw new ValidationError('请求数据格式错误', parsed.error.flatten())
+
+    await authService.resetPassword(parsed.data.resetToken, parsed.data.newPassword, c.env)
+    return c.json({ success: true, data: null, message: '密码已成功重置，请使用新密码登录' })
+  },
+)
 
 export { auth as authRoutes }
