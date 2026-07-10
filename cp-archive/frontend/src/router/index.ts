@@ -5,6 +5,8 @@ import { useAuthStore } from '@/stores/auth'
 const HomeView      = () => import('@/views/HomeView.vue')
 const LoginView     = () => import('@/views/auth/LoginView.vue')
 const RegisterView  = () => import('@/views/auth/RegisterView.vue')
+const ForgotPasswordView = () => import('@/views/auth/ForgotPasswordView.vue')
+const ForgotPasswordView = () => import('@/views/auth/ForgotPasswordView.vue')
 const CpDetailView  = () => import('@/views/cp/CpDetailView.vue')
 const ProfileTab    = () => import('@/views/cp/ProfileTab.vue')
 const TimelineTab   = () => import('@/views/cp/TimelineTab.vue')
@@ -39,6 +41,12 @@ const router = createRouter({
       path: '/register',
       name: 'register',
       component: RegisterView,
+      meta: { requiresAuth: false },
+    },
+    {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: ForgotPasswordView,
       meta: { requiresAuth: false },
     },
     // ── 全局搜索 ───────────────────────────────────────────────
