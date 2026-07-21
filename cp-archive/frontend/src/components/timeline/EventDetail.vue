@@ -26,7 +26,7 @@
     <!-- 标签 -->
     <div v-if="event.emotionIcon || event.isMilestone" class="flex gap-2 mb-3">
       <span v-if="event.emotionIcon" class="text-base">{{ event.emotionIcon }}</span>
-      <span v-if="event.isMilestone" class="text-xs bg-[var(--color-high)] text-white px-2 py-0.5 rounded-[var(--radius-tag)]">里程碑</span>
+      <span v-if="event.isMilestone" class="text-xs bg-[var(--color-high)] text-white px-2 py-0.5 rounded-[var(--radius-tag)]">节点</span>
     </div>
 
     <!-- 操作按钮 -->
@@ -42,7 +42,7 @@
         class="text-xs transition-colors"
         :class="event.isMilestone ? 'text-[var(--color-high)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-high)]'"
         @click="$emit('milestone-toggled', !event.isMilestone)"
-      >{{ event.isMilestone ? '取消里程碑' : '标记里程碑' }}</button>
+      >{{ event.isMilestone ? '取消节点' : '标记节点' }}</button>
 
       <button
         v-if="canInCp(cpId, 'history:view:others')"
@@ -123,7 +123,7 @@ const plainText = computed<string | null>(() => {
 })
 
 async function handleDelete() {
-  if (!confirm('确认删除这条事件记录？')) return
+  if (!confirm('确认删除这条记录？')) return
   await deleteEvent(props.event.id)
   emit('deleted', props.event.id)
 }

@@ -44,10 +44,10 @@
     <!-- CP 级独立订阅 -->
     <section v-if="cpStore.list.length > 0">
       <h3 class="text-sm font-medium text-[var(--color-text-secondary)] uppercase tracking-wide mb-1">
-        按 CP 独立配置
+        按关系独立配置
       </h3>
       <p class="text-xs text-[var(--color-text-disabled)] mb-3">
-        CP 级配置优先级高于全站配置。未单独设置的 CP 将继承全站偏好。
+        关系独立配置优先级高于全站配置。未单独设置的关系将继承全站偏好。
       </p>
 
       <!-- CP 选择器 -->

@@ -72,7 +72,7 @@
         <label class="text-sm font-medium text-[var(--color-text-body)]">详细内容</label>
         <BlockEditor
           v-model="form.contentJson"
-          placeholder="详细描述这个事件的经过..."
+          placeholder="记录这个时刻的经过与细节…"
         />
       </div>
 
@@ -85,7 +85,7 @@
 
       <!-- 情绪图标 -->
       <div class="flex flex-col gap-1.5">
-        <label class="text-sm font-medium text-[var(--color-text-body)]">情感标记</label>
+        <label class="text-sm font-medium text-[var(--color-text-body)]">情绪标记</label>
         <div class="flex gap-2 flex-wrap">
           <button
             v-for="emoji in emotionEmojis"

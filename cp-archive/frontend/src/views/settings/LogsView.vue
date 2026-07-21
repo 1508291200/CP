@@ -19,10 +19,10 @@
         @change="load(1)"
       >
         <option value="">所有资源类型</option>
-        <option value="cp">CP</option>
+        <option value="cp">关系</option>
         <option value="event">事件</option>
         <option value="user">用户</option>
-        <option value="milestone">里程碑</option>
+        <option value="milestone">节点</option>
         <option value="media">媒体</option>
       </select>
       <button

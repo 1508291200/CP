@@ -1,10 +1,12 @@
 /**
  * 文件上传中间件（Multer 配置）
- * 白名单校验 + 磁盘存储 + 路径按日期组织
+ * 白名单校验 + 内存存储（文件先读入内存，再由 media.service 上传到 R2 或本地磁盘）
+ *
+ * 注意：改为内存存储后，file.buffer 包含文件内容，file.path 不再可用。
  */
 import multer from 'multer'
 import path from 'node:path'
-import { randomUUID } from 'node:crypto'
+import { mkdirSync } from 'node:fs'
 import { getConfig } from '../config/index.js'
 import { AppError } from '../shared/errors.js'
 
@@ -17,24 +19,13 @@ const ALLOWED_MIME = new Set([
 
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
 
-function buildUploadPath(): string {
-  const now   = new Date()
-  const year  = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const config = getConfig()
-  return path.join(config.UPLOAD_DIR, 'originals', String(year), month)
-}
-
+/**
+ * multer 实例：统一使用内存存储。
+ * - R2 模式：buffer 直接上传到 R2，无磁盘写入
+ * - 本地模式：buffer 写入磁盘（在 media.service 中处理）
+ */
 export const upload = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => {
-      cb(null, buildUploadPath())
-    },
-    filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname).toLowerCase()
-      cb(null, `${randomUUID()}${ext}`)
-    },
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: MAX_SIZE },
   fileFilter: (_req, file, cb) => {
     if (!ALLOWED_MIME.has(file.mimetype)) {
@@ -45,10 +36,11 @@ export const upload = multer({
   },
 })
 
-/** 为上传路径创建目录（应用启动时调用） */
+/** 为本地存储模式创建目录（仅 R2_ENABLED=false 时需要） */
 export async function ensureUploadDirs() {
-  const { mkdirSync } = await import('node:fs')
   const config = getConfig()
+  if (config.R2_ENABLED) return // R2 模式不需要本地目录
+
   const dirs = [
     path.join(config.UPLOAD_DIR, 'originals'),
     path.join(config.UPLOAD_DIR, 'thumbs'),

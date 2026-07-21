@@ -13,7 +13,7 @@
           <input
             ref="inputRef"
             v-model="keyword"
-            placeholder="搜索 CP、事件、里程碑、人物…"
+            placeholder="搜索关系、事件、节点、人物…"
             class="w-full pl-9 pr-4 py-2 text-sm rounded-[var(--radius-input)] border border-[var(--color-border-input)] bg-[var(--color-bg-page)] text-[var(--color-text-body)] outline-none focus:border-[var(--color-primary)] transition-colors"
             @input="onInput"
             @keydown.escape="router.back()"
@@ -27,7 +27,7 @@
 
         <!-- CP 范围过滤提示 -->
         <div v-if="cpIdFilter" class="flex-shrink-0 flex items-center gap-1 text-xs text-[var(--color-primary)] bg-[var(--color-primary-bg)] px-2 py-1 rounded">
-          <span>当前 CP</span>
+          <span>当前关系</span>
           <button class="hover:text-[var(--color-danger)]" @click="cpIdFilter = ''; doSearch()">×</button>
         </div>
       </div>
@@ -38,7 +38,7 @@
       <div v-if="!keyword.trim() && !result" class="text-center py-20">
         <div class="text-5xl mb-4">🔍</div>
         <p class="text-[var(--color-text-secondary)]">输入关键词搜索所有内容</p>
-        <p class="text-xs text-[var(--color-text-disabled)] mt-2">支持搜索 CP 名称、事件标题/摘要、里程碑、人物</p>
+        <p class="text-xs text-[var(--color-text-disabled)] mt-2">支持搜索关系名称、事件标题/摘要、节点、人物</p>
       </div>
 
       <!-- 加载中 -->
@@ -124,9 +124,9 @@ const loading  = ref(false)
 const activeType = ref<SearchHitType | null>(null)
 
 const TYPE_TABS = [
-  { value: 'cp'        as SearchHitType, label: 'CP' },
+  { value: 'cp'        as SearchHitType, label: '关系' },
   { value: 'event'     as SearchHitType, label: '事件' },
-  { value: 'milestone' as SearchHitType, label: '里程碑' },
+  { value: 'milestone' as SearchHitType, label: '节点' },
   { value: 'character' as SearchHitType, label: '人物' },
 ]
 
@@ -137,9 +137,9 @@ const TYPE_ICON: Record<SearchHitType, string> = {
   character: '👤',
 }
 const TYPE_LABEL: Record<SearchHitType, string> = {
-  cp:        'CP',
+  cp:        '关系',
   event:     '事件',
-  milestone: '里程碑',
+  milestone: '节点',
   character: '人物',
 }
 

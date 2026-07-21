@@ -17,6 +17,14 @@ interface AppConfig {
   VERSION: string
   /** 逗号分隔的允许 CORS 来源（生产环境必须设置） */
   ALLOWED_ORIGINS: string[]
+  /** Cloudflare R2 配置（启用时替代本地磁盘存储） */
+  R2_ENABLED: boolean
+  R2_ACCOUNT_ID: string
+  R2_ACCESS_KEY_ID: string
+  R2_SECRET_ACCESS_KEY: string
+  R2_BUCKET_NAME: string
+  /** R2 公共访问域名（绑定自定义域名后的 URL，无尾斜线） */
+  R2_PUBLIC_URL: string
 }
 
 function requireEnv(key: string): string {
@@ -57,6 +65,12 @@ export function loadConfig(): AppConfig {
       .split(',')
       .map(s => s.trim())
       .filter(Boolean),
+    R2_ENABLED: optionalEnv('R2_ENABLED', 'false') === 'true',
+    R2_ACCOUNT_ID: optionalEnv('R2_ACCOUNT_ID', ''),
+    R2_ACCESS_KEY_ID: optionalEnv('R2_ACCESS_KEY_ID', ''),
+    R2_SECRET_ACCESS_KEY: optionalEnv('R2_SECRET_ACCESS_KEY', ''),
+    R2_BUCKET_NAME: optionalEnv('R2_BUCKET_NAME', ''),
+    R2_PUBLIC_URL: optionalEnv('R2_PUBLIC_URL', ''),
   }
 }
 

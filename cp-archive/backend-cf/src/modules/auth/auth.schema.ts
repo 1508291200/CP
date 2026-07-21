@@ -9,9 +9,9 @@ export const loginSchema = z.object({
 })
 
 export const registerSchema = z.object({
-  username: z.string().min(2, '用户名至少 2 位').max(50).regex(/^[a-zA-Z0-9_-]+$/, '用户名只能包含字母、数字、下划线、连字符'),
-  email: z.string().email('邮箱格式错误'),
-  password: z.string().min(8, '密码至少 8 位').max(100),
+  username:   z.string().min(2, '用户名至少 2 位').max(50).regex(/^[a-zA-Z0-9_-]+$/, '用户名只能包含字母、数字、下划线、连字符'),
+  email:      z.string().email('邮箱格式错误'),
+  password:   z.string().min(8, '密码至少 8 位').max(100),
   inviteCode: z.string().min(1, '邀请码不能为空'),
 })
 
@@ -29,8 +29,8 @@ export const resetPasswordSchema = z.object({
   newPassword: z.string().min(8, '密码至少8位').max(100),
 })
 
-export type LoginInput           = z.infer<typeof loginSchema>
-export type RegisterInput        = z.infer<typeof registerSchema>
-export type ForgotPasswordInput  = z.infer<typeof forgotPasswordSchema>
+export type LoginInput          = z.infer<typeof loginSchema>
+export type RegisterInput       = z.infer<typeof registerSchema>
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
 export type VerifyResetCodeInput = z.infer<typeof verifyResetCodeSchema>
-export type ResetPasswordInput   = z.infer<typeof resetPasswordSchema>
+export type ResetPasswordInput  = z.infer<typeof resetPasswordSchema>

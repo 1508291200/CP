@@ -7,7 +7,7 @@
         v-model="selectedYear"
       />
       <Button v-if="can('cp:create')" size="sm" @click="openCreateMilestone">
-        + 添加里程碑
+        + 添加节点
       </Button>
     </div>
 
@@ -19,8 +19,8 @@
     <!-- 空状态 -->
     <div v-else-if="!msStore.loading && !filteredMilestones.length" class="text-center py-20">
       <div class="text-5xl mb-4">🌟</div>
-      <p class="text-[var(--color-text-secondary)] mb-4">还没有里程碑</p>
-      <Button v-if="can('cp:create')" @click="openCreateMilestone">记录第一个里程碑</Button>
+      <p class="text-[var(--color-text-secondary)] mb-4">还没有节点</p>
+      <Button v-if="can('cp:create')" @click="openCreateMilestone">记录第一个节点</Button>
     </div>
 
     <!-- 横向滚动卡片 -->
@@ -43,7 +43,7 @@
     <div v-if="msStore.list.length" class="mt-8 grid grid-cols-3 gap-4">
       <div class="bg-[var(--color-bg-card)] rounded-[var(--radius-card)] p-4 text-center shadow-[var(--shadow-card)]">
         <div class="text-2xl font-bold text-[var(--color-primary)]">{{ msStore.list.length }}</div>
-        <div class="text-xs text-[var(--color-text-secondary)] mt-1">里程碑</div>
+        <div class="text-xs text-[var(--color-text-secondary)] mt-1">节点</div>
       </div>
       <div class="bg-[var(--color-bg-card)] rounded-[var(--radius-card)] p-4 text-center shadow-[var(--shadow-card)]">
         <div class="text-2xl font-bold text-[var(--color-primary)]">{{ availableYears.length }}</div>

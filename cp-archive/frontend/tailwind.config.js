@@ -49,11 +49,11 @@ export default {
         DEFAULT: 'var(--duration-normal)',
       },
       fontSize: {
-        xs:   ['0.8125rem', { lineHeight: '1.5' }],
-        sm:   ['0.9375rem', { lineHeight: '1.6' }],
-        base: ['1rem',      { lineHeight: '1.7' }],
-        lg:   ['1.125rem',  { lineHeight: '1.7' }],
-        xl:   ['1.25rem',   { lineHeight: '1.6' }],
+        xs:   ['0.8125rem', { lineHeight: '1.5' }],   // 13px (原12px)
+        sm:   ['0.9375rem', { lineHeight: '1.6' }],   // 15px (原14px)
+        base: ['1rem',      { lineHeight: '1.7' }],   // 16px (原16px)
+        lg:   ['1.125rem',  { lineHeight: '1.7' }],   // 18px
+        xl:   ['1.25rem',   { lineHeight: '1.6' }],   // 20px
         '2xl':['1.5rem',    { lineHeight: '1.5' }],
         '3xl':['1.875rem',  { lineHeight: '1.4' }],
       },

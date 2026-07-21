@@ -242,4 +242,4 @@ export async function resetPassword(resetToken: string, newPassword: string, env
 
   // 立即使令牌失效（一次性使用）
   await deleteResetToken(env.KV, resetToken)
-    }
+}

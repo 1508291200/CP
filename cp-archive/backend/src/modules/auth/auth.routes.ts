@@ -12,6 +12,9 @@ const auth = new Hono()
 
 const COOKIE_NAME = 'cp_refresh_token'
 const IS_PROD = process.env['NODE_ENV'] === 'production'
+// 跨域部署（前端与后端不同域）时需设为 'None'，同域部署时用 'Strict'
+// 通过 COOKIE_SAMESITE 环境变量控制，默认同域使用 'Strict'
+const COOKIE_SAMESITE = (process.env['COOKIE_SAMESITE'] ?? 'Strict') as 'Strict' | 'Lax' | 'None'
 
 // POST /auth/login  - IP: 10次/分钟；用户名: 5次/分钟（双维度，防暴力枚举）
 auth.post('/login',
@@ -33,7 +36,7 @@ auth.post('/login',
     setCookie(c, COOKIE_NAME, result.refreshToken, {
       httpOnly: true,
       secure:   IS_PROD,
-      sameSite: 'Strict',
+      sameSite: COOKIE_SAMESITE,
       path:     '/api/v1/auth',
       maxAge:   7 * 24 * 60 * 60,
     })
@@ -59,7 +62,7 @@ auth.post('/logout', authMiddleware, async (c) => {
   const user = c.get('user')
   await authService.logout(user.userId)
 
-  deleteCookie(c, COOKIE_NAME, { path: '/api/v1/auth' })
+  deleteCookie(c, COOKIE_NAME, { path: '/api/v1/auth', sameSite: COOKIE_SAMESITE, secure: IS_PROD })
   return c.json(success(null))
 })
 

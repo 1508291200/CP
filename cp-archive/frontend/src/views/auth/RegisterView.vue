@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-bg-page)] flex items-center justify-center p-4">
     <div class="w-full max-w-sm">
       <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold text-[var(--color-text-title)] mb-1">CP 档案站</h1>
+        <h1 class="text-2xl font-bold text-[var(--color-text-title)] mb-1">关系图书馆</h1>
         <p class="text-[var(--color-text-secondary)] text-sm">注册新账号</p>
       </div>
 

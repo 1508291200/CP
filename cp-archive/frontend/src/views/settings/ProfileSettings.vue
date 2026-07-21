@@ -3,8 +3,10 @@
     <h2 class="text-lg font-semibold text-[var(--color-text-title)] mb-6">个人资料</h2>
 
     <form class="flex flex-col gap-5" @submit.prevent="handleSave">
+      <!-- 圆形头像上传 -->
       <CoverUpload v-model="form.avatarUrl" label="头像" />
 
+      <!-- 昵称 -->
       <div class="flex flex-col gap-1.5">
         <label class="text-sm font-medium text-[var(--color-text-body)]">昵称</label>
         <input
@@ -15,6 +17,7 @@
         />
       </div>
 
+      <!-- 只读信息 -->
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-1.5">
           <label class="text-sm font-medium text-[var(--color-text-body)]">用户名</label>
@@ -30,6 +33,7 @@
         </div>
       </div>
 
+      <!-- 全局提示 -->
       <div v-if="msg" class="text-sm rounded-lg py-2 text-center"
         :class="msgType === 'ok' ? 'text-green-700 bg-green-50' : 'text-[var(--color-danger)] bg-red-50'"
       >{{ msg }}</div>
@@ -49,7 +53,7 @@ import { useAuthStore } from '@/stores/auth'
 const ROLE_LABEL: Record<string, string> = {
   owner:    '站长',
   admin:    '管理员',
-  cp_admin: 'CP 管理',
+  cp_admin: '关系管理',
   editor:   '编辑',
   viewer:   '访客',
 }
@@ -60,12 +64,14 @@ const saving  = ref(false)
 const msg     = ref('')
 const msgType = ref<'ok' | 'err'>('ok')
 
+// 先用 store 缓存初始化，避免闪烁
 const form = reactive({
   displayName: userStore.me?.displayName ?? '',
   avatarUrl:   userStore.me?.avatarUrl   ?? '',
 })
 
 onMounted(async () => {
+  // 总是从服务器刷新最新数据
   await userStore.fetchMe()
   form.displayName = userStore.me?.displayName ?? ''
   form.avatarUrl   = userStore.me?.avatarUrl   ?? ''
@@ -79,6 +85,7 @@ async function handleSave() {
       displayName: form.displayName,
       avatarUrl: form.avatarUrl || undefined,
     })
+    // 同步最新头像和昵称到 auth store（主页导航栏用）
     if (authStore.user) {
       authStore.setUser({
         ...authStore.user,

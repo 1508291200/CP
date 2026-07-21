@@ -13,7 +13,7 @@ export interface ImportResult {
 /** 全站导出，返回下载 URL（blob） */
 export async function exportFull(): Promise<void> {
   const token = getAccessToken()
-  const res = await apiClient.get('/api/v1/data/export/full', {
+  const res = await apiClient.get('/data/export/full', {
     responseType: 'blob',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   })
@@ -23,7 +23,7 @@ export async function exportFull(): Promise<void> {
 /** 单 CP 导出 */
 export async function exportCp(cpId: string): Promise<void> {
   const token = getAccessToken()
-  const res = await apiClient.get(`/api/v1/data/export/${cpId}`, {
+  const res = await apiClient.get(`/data/export/${cpId}`, {
     responseType: 'blob',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   })
@@ -35,7 +35,7 @@ export async function importData(file: File, mode: ImportMode): Promise<ImportRe
   const token = getAccessToken()
   const formData = new FormData()
   formData.append('file', file)
-  const res = await apiClient.post(`/api/v1/data/import?mode=${mode}`, formData, {
+  const res = await apiClient.post(`/data/import?mode=${mode}`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -47,7 +47,7 @@ export async function importData(file: File, mode: ImportMode): Promise<ImportRe
 /** 危险：清空全站 */
 export async function clearAllData(): Promise<void> {
   const token = getAccessToken()
-  await apiClient.delete('/api/v1/data/data', {
+  await apiClient.delete('/data/data', {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   })
 }

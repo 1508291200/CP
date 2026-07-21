@@ -1,12 +1,12 @@
 <template>
   <Modal
     :visible="visible"
-    :title="isEdit ? '编辑里程碑' : '添加里程碑'"
+    :title="isEdit ? '编辑节点' : '添加节点'"
     @update:visible="$emit('update:visible', $event)"
   >
     <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
       <!-- 标题 -->
-      <Input v-model="form.title" label="里程碑标题" placeholder="简短描述这个重要时刻" required :error="errors.title" />
+      <Input v-model="form.title" label="节点标题" placeholder="为这个节点起个标题" required :error="errors.title" />
 
       <!-- 日期 -->
       <div class="flex flex-col gap-1.5">
@@ -42,14 +42,14 @@
         <textarea
           v-model="form.description"
           rows="3"
-          placeholder="这个里程碑的意义..."
+          placeholder="记录这个节点的意义..."
           class="w-full px-3 py-2.5 rounded-[var(--radius-input)] border border-[var(--color-border-input)] bg-[var(--color-bg-page)] text-[var(--color-text-body)] text-sm outline-none focus:border-[var(--color-primary)] resize-none placeholder:text-[var(--color-text-disabled)]"
         />
       </div>
 
       <!-- 关联时间轴事件 -->
       <div class="flex flex-col gap-1.5">
-        <label class="text-sm font-medium text-[var(--color-text-body)]">关联时间轴事件（可选）</label>
+        <label class="text-sm font-medium text-[var(--color-text-body)]">关联时间轴事件</label>
         <select
           v-model="form.eventId"
           class="px-3 py-2 rounded-[var(--radius-input)] border border-[var(--color-border-input)] bg-[var(--color-bg-page)] text-[var(--color-text-body)] text-sm outline-none focus:border-[var(--color-primary)]"
@@ -59,13 +59,13 @@
             {{ ev.title }}（{{ formatEventDate(ev.eventDate) }}）
           </option>
         </select>
-        <p class="text-xs text-[var(--color-text-disabled)]">仅显示已标记为里程碑的时间轴事件</p>
+        <p class="text-xs text-[var(--color-text-disabled)]">仅显示已标为节点的时间轴事件</p>
       </div>
     </form>
 
     <template #footer>
       <Button variant="ghost" @click="$emit('update:visible', false)">取消</Button>
-      <Button :loading="submitting" @click="handleSubmit">{{ isEdit ? '保存修改' : '添加里程碑' }}</Button>
+      <Button :loading="submitting" @click="handleSubmit">{{ isEdit ? '保存修改' : '添加节点' }}</Button>
     </template>
   </Modal>
 </template>
@@ -132,7 +132,7 @@ function formatEventDate(date: string | null) {
 }
 
 async function handleSubmit() {
-  errors.title = form.title.trim() ? '' : '请填写里程碑标题'
+  errors.title = form.title.trim() ? '' : '请填写节点标题'
   if (errors.title) return
 
   submitting.value = true
@@ -150,7 +150,7 @@ async function handleSubmit() {
       toast.success('已更新 ✓')
     } else {
       await msStore.createMilestone(props.cpId, payload)
-      toast.success('里程碑已添加 🌟')
+      toast.success('节点已添加')
     }
 
     emit('update:visible', false)

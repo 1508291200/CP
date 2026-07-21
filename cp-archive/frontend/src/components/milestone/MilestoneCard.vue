@@ -71,7 +71,7 @@ function isUrl(s: string) {
 }
 
 async function handleDelete() {
-  if (!confirm(`确认删除里程碑「${props.milestone.title}」？`)) return
+  if (!confirm(`确认删除节点「${props.milestone.title}」？`)) return
   try {
     await msStore.deleteMilestone(props.milestone.cpId, props.milestone.id)
     toast.success('已删除')

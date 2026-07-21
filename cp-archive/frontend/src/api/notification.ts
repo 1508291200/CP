@@ -28,11 +28,11 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   'event:created':       '新事件发布',
   'event:updated':       '事件内容更新',
   'event:deleted':       '事件删除',
-  'event:milestone':     '里程碑标记',
+  'event:milestone':     '节点标记',
   'member:joined':       '新成员加入',
   'member:role_changed': '成员权限变更',
   'member:removed':      '成员被移除',
-  'cp:updated':          'CP 信息更新',
+  'cp:updated':          '关系信息更新',
 }
 
 export const ALL_NOTIFICATION_TYPES: NotificationType[] = [

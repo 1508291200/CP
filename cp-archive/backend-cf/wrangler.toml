@@ -1,4 +1,4 @@
-name = "cp-archive"
+name = "cp-archive-api"
 main = "src/index.ts"
 compatibility_date = "2024-12-18"
 compatibility_flags = ["nodejs_compat"]
@@ -6,14 +6,14 @@ compatibility_flags = ["nodejs_compat"]
 # ── Workers KV（Session + 限速）────────────────────────
 [[kv_namespaces]]
 binding = "KV"
-id = "a1f596247c7149f0b25cc4d983643fa3"
-preview_id = "a1f596247c7149f0b25cc4d983643fa3"
+id = "placeholder_kv_id"
+preview_id = "placeholder_kv_preview_id"
 
 # ── D1 数据库 ───────────────────────────────────────────
 [[d1_databases]]
 binding = "DB"
 database_name = "cp-archive-db"
-database_id = "eb8eb1e1-a5ee-40c0-9efa-d753793fdafb"
+database_id = "placeholder_db_id"
 migrations_dir = "migrations"
 
 # ── 环境变量（非敏感，放这里）──────────────────────────
@@ -21,8 +21,8 @@ migrations_dir = "migrations"
 [vars]
 NODE_ENV = "production"
 # 腾讯云 COS 配置
-COS_BUCKET = "cp-archive-media-1320730143"   # 替换为你的存储桶名称（含 APPID）
-COS_REGION = "ap-shanghai"                  # 替换为你选择的地域
+COS_BUCKET = "cp-archive-media-1234567890"   # 替换为你的存储桶名称（含 APPID）
+COS_REGION = "ap-guangzhou"                  # 替换为你选择的地域
 COS_URL_EXPIRES = "3600"                     # 预签名 URL 有效期（秒），3600 = 1小时
 
 # ── 开发环境配置 ────────────────────────────────────────

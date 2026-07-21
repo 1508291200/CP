@@ -69,10 +69,10 @@
       <div v-if="importResult" class="mb-4 p-3 bg-[var(--color-bg-page)] rounded-[var(--radius-card)] text-sm">
         <div class="font-medium text-[var(--color-text-body)] mb-1">导入完成（{{ importResult.mode }} 模式）</div>
         <div class="grid grid-cols-3 gap-2 text-[var(--color-text-secondary)]">
-          <span>CP: {{ importResult.imported.cps }}</span>
+          <span>关系: {{ importResult.imported.cps }}</span>
           <span>事件: {{ importResult.imported.events }}</span>
           <span>角色: {{ importResult.imported.characters }}</span>
-          <span>里程碑: {{ importResult.imported.milestones }}</span>
+          <span>节点: {{ importResult.imported.milestones }}</span>
           <span>标签: {{ importResult.imported.tags }}</span>
           <span>跳过: {{ importResult.skipped }}</span>
         </div>
@@ -92,7 +92,7 @@
     <section class="bg-[var(--color-bg-card)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] p-6 border border-[var(--color-danger)]/30">
       <h3 class="font-medium text-[var(--color-danger)] mb-4">⚠️ 危险操作</h3>
       <p class="text-sm text-[var(--color-text-secondary)] mb-4">
-        清空全站所有 CP、事件、角色、里程碑和标签数据。此操作<strong class="text-[var(--color-danger)]">不可撤销</strong>，请先导出备份。
+        清空全站所有关系、事件、角色、节点和标签数据。此操作<strong class="text-[var(--color-danger)]">不可撤销</strong>，请先导出备份。
       </p>
 
       <div v-if="!showClearConfirm">
@@ -194,7 +194,7 @@ async function handleImport() {
   importing.value = true
   try {
     importResult.value = await importData(importFile.value, importMode.value)
-    toast.success(`导入完成：${importResult.value.imported.cps} 个 CP`)
+    toast.success(`导入完成：${importResult.value.imported.cps} 个关系`)
     cpStore.fetchList({ page: 1, limit: 20 })
   } catch {
     toast.error('导入失败，请检查文件格式')

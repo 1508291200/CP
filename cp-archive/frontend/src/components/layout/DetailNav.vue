@@ -12,7 +12,7 @@
         <div v-if="cp" class="min-w-0">
           <div class="flex items-center gap-1.5">
             <span class="font-semibold text-sm text-[var(--color-text-title)] truncate">{{ cp.name }}</span>
-              </div>
+          </div>
           <p v-if="cp.subtitle" class="text-xs text-[var(--color-text-secondary)] truncate leading-none">
             {{ cp.subtitle }}
           </p>

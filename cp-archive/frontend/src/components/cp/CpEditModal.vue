@@ -1,19 +1,19 @@
 <template>
-  <Modal :visible="visible" title="编辑 CP 信息" @update:visible="$emit('update:visible', $event)">
+  <Modal :visible="visible" title="编辑关系信息" @update:visible="$emit('update:visible', $event)">
     <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
-      <Input v-model="form.name" label="CP 名称" placeholder="例：黎明将至" required :error="errors.name" />
-      <Input v-model="form.subtitle" label="人物组合" placeholder="例：陆知行 × 顾深" />
+      <Input v-model="form.name" label="关系名称" placeholder="例：双北" required :error="errors.name" />
+      <Input v-model="form.subtitle" label="关联对象" placeholder="例：撤贝宁 &amp; 何炱" />
       <div class="flex flex-col gap-1.5">
         <label class="text-sm font-medium text-[var(--color-text-body)]">简介</label>
         <textarea
           v-model="form.description"
           rows="3"
-          placeholder="用一句话描述这对 CP 的故事..."
+          placeholder="用一句话描述这段关系…"
           class="w-full px-4 py-2.5 rounded-[var(--radius-input)] border border-[var(--color-border-input)] bg-[var(--color-bg-page)] text-[var(--color-text-body)] text-sm outline-none transition-colors focus:border-[var(--color-primary)] resize-none placeholder:text-[var(--color-text-disabled)]"
         />
       </div>
       <!-- 封面图 -->
-      <CoverUpload v-model="form.coverUrl" label="封面图（小方图，显示在 Banner 左侧）" />
+      <CoverUpload v-model="form.coverUrl" label="封面图（显示在页眉左侧）" />
       <!-- Banner 横图 -->
       <CoverUpload v-model="form.bannerUrl" label="Banner 横图（可选，用作页面背景）" />
       <div class="flex flex-col gap-1.5">
@@ -87,7 +87,7 @@ watch(
 )
 
 async function handleSubmit() {
-  errors.name = form.name.trim() ? '' : '请输入 CP 名称'
+  errors.name = form.name.trim() ? '' : '请输入关系名称'
   if (errors.name) return
 
   submitting.value = true
@@ -100,7 +100,7 @@ async function handleSubmit() {
       coverUrl:    form.coverUrl   || undefined,
       bannerUrl:   form.bannerUrl  || undefined,
     })
-    toast.success('CP 信息已保存')
+    toast.success('档案已更新')
     emit('update:visible', false)
     emit('saved')
   } catch (err) {

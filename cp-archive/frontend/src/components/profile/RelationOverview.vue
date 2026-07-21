@@ -26,7 +26,7 @@
         class="text-sm text-[var(--color-text-body)] leading-relaxed whitespace-pre-wrap"
       >{{ plainText }}</div>
       <p v-else class="text-sm text-[var(--color-text-disabled)] italic">
-        还没有关系概述，点击编辑添加
+        还没有任何文字，点击编辑写下第一行
       </p>
     </div>
 
@@ -34,7 +34,7 @@
     <div v-else>
       <BlockEditor
         v-model="editJson"
-        placeholder="描述这对 CP 的关系，故事，以及你的感受..."
+        placeholder="记录这段关系的脉络与故事…"
       />
       <div class="flex gap-2 justify-end mt-3">
         <Button variant="ghost" size="sm" @click="cancelEdit">取消</Button>

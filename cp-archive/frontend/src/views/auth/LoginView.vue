@@ -3,8 +3,8 @@
     <div class="w-full max-w-sm">
       <!-- Logo / 标题 -->
       <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold text-[var(--color-text-title)] mb-1">CP 档案站</h1>
-        <p class="text-[var(--color-text-secondary)] text-sm">记录每一份心动的轨迹</p>
+        <h1 class="text-2xl font-bold text-[var(--color-text-title)] mb-1">关系图书馆</h1>
+        <p class="text-[var(--color-text-secondary)] text-sm">留存每一段值得记录的联结</p>
       </div>
 
       <!-- 登录卡片 -->

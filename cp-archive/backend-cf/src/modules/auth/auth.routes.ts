@@ -92,12 +92,13 @@ auth.get('/me', authMiddleware, async (c) => {
 
 // POST /auth/forgot-password
 auth.post('/forgot-password',
-  rateLimit({ max: 5, windowMs: 3_600_000 }),
+  rateLimit({ max: 5, windowMs: 3_600_000 }),  // 5次/小时
   async (c) => {
     const body = await c.req.json().catch(() => null)
     const parsed = forgotPasswordSchema.safeParse(body)
     if (!parsed.success) throw new ValidationError('请求数据格式错误', parsed.error.flatten())
 
+    // 无论邮箱是否存在，均返回相同响应（防止邮箱枚举）
     await authService.forgotPassword(parsed.data.email, c.env)
     return c.json({ success: true, data: null, message: '如果该邮箱已注册，验证码已发送，请查收邮件' })
   },
@@ -105,7 +106,7 @@ auth.post('/forgot-password',
 
 // POST /auth/verify-reset-code
 auth.post('/verify-reset-code',
-  rateLimit({ max: 10, windowMs: 15 * 60_000 }),
+  rateLimit({ max: 10, windowMs: 15 * 60_000 }),  // 10次/15分钟
   async (c) => {
     const body = await c.req.json().catch(() => null)
     const parsed = verifyResetCodeSchema.safeParse(body)
@@ -118,7 +119,7 @@ auth.post('/verify-reset-code',
 
 // POST /auth/reset-password
 auth.post('/reset-password',
-  rateLimit({ max: 5, windowMs: 15 * 60_000 }),
+  rateLimit({ max: 5, windowMs: 15 * 60_000 }),  // 5次/15分钟
   async (c) => {
     const body = await c.req.json().catch(() => null)
     const parsed = resetPasswordSchema.safeParse(body)

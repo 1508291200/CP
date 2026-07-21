@@ -3,6 +3,7 @@
   <div class="flex flex-col items-center gap-3">
     <label class="text-sm font-medium text-[var(--color-text-body)] self-start">{{ label }}</label>
 
+    <!-- 圆形预览 / 上传触发 -->
     <div
       class="relative group w-24 h-24 rounded-full overflow-hidden border-2 border-dashed border-[var(--color-border-input)] bg-[var(--color-bg-page)] cursor-pointer hover:border-[var(--color-primary)] transition-colors flex-shrink-0"
       :class="{ 'border-solid border-[var(--color-border)]': currentUrl }"
@@ -10,14 +11,21 @@
       @dragover.prevent
       @drop.prevent="onDrop"
     >
+      <!-- 已有头像 -->
       <img v-if="currentUrl" :src="currentUrl" class="w-full h-full object-cover" />
+
+      <!-- 上传中 spinner -->
       <div v-else-if="uploading" class="w-full h-full flex items-center justify-center">
         <span class="w-6 h-6 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
       </div>
+
+      <!-- 空状态 -->
       <div v-else class="w-full h-full flex flex-col items-center justify-center gap-1">
         <span class="text-2xl">👤</span>
         <span class="text-[10px] text-[var(--color-text-secondary)] leading-tight text-center px-1">点击上传</span>
       </div>
+
+      <!-- hover 遮罩（有图时） -->
       <div
         v-if="currentUrl"
         class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1"
@@ -26,6 +34,7 @@
       </div>
     </div>
 
+    <!-- 移除按钮（有图时显示） -->
     <button
       v-if="currentUrl"
       type="button"
@@ -33,8 +42,12 @@
       @click.stop="clearImage"
     >移除头像</button>
 
+    <!-- 上传进度条 -->
     <div v-if="uploading" class="w-24 h-1 bg-[var(--color-border)] rounded-full overflow-hidden">
-      <div class="h-full bg-[var(--color-primary)] transition-all duration-300" :style="{ width: progress + '%' }" />
+      <div
+        class="h-full bg-[var(--color-primary)] transition-all duration-300"
+        :style="{ width: progress + '%' }"
+      />
     </div>
 
     <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileChange" />
@@ -48,7 +61,7 @@ import { useToast } from '@/composables/useToast'
 
 const props = defineProps<{
   label?: string
-  modelValue?: string
+  modelValue?: string   // 当前 URL（由父组件控制）
 }>()
 
 const emit = defineEmits<{
@@ -60,6 +73,7 @@ const fileInput = ref<HTMLInputElement>()
 const uploading = ref(false)
 const progress  = ref(0)
 
+// 响应式本地预览 URL——跟随 modelValue 变化（父组件异步加载后能正确更新）
 const currentUrl = ref(props.modelValue ?? '')
 watch(() => props.modelValue, (val) => {
   currentUrl.value = val ?? ''
@@ -97,6 +111,7 @@ async function uploadFile(file: File) {
 function onFileChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (file) uploadFile(file)
+  // 清空 input 以允许重复选同一文件
   ;(e.target as HTMLInputElement).value = ''
 }
 
